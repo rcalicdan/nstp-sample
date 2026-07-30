@@ -4,14 +4,28 @@ declare(strict_types=1);
 
 namespace App\Livewire\CwtsStudents;
 
+use App\Enums\Gender;
+use App\Enums\NstpComponent;
+use App\Livewire\Forms\CwtsStudents\CreateForm;
+use App\Livewire\Forms\CwtsStudents\UpdateForm;
+use App\Models\SchoolYear;
+use App\Models\Student;
 use App\Traits\WithToast;
+use Illuminate\Database\Eloquent\Builder;
+use Livewire\Attributes\Computed;
 use Livewire\Attributes\Layout;
 use Livewire\Component;
+use Livewire\WithPagination;
 
 #[Layout('layouts.app')]
 class Index extends Component
 {
+    use WithPagination;
     use WithToast;
+
+    public CreateForm $createForm;
+
+    public UpdateForm $updateForm;
 
     public string $search = '';
 
@@ -19,79 +33,86 @@ class Index extends Component
 
     public string $schoolYear = '';
 
-    /**
-     * @return array<int, array<string, mixed>>
-     */
-    private function getMockStudents(): array
+    public function updatingSearch(): void
     {
-        return [
-            [
-                'id' => 1,
-                'serial_number' => 'C-24-000001-01',
-                'last_name' => 'Santos',
-                'first_name' => 'Maria',
-                'middle_name' => 'Cruz',
-                'course' => 'BSIT',
-                'gender' => 'Female',
-                'school_year' => '2024-2025',
-                'contact_number' => '09171234501',
-                'email' => 'maria.santos@evsu.edu.ph',
-                'birth_date' => '2004-03-12',
-                'city_address' => 'Tacloban City',
-                'province_address' => 'Leyte',
-            ],
-            [
-                'id' => 2,
-                'serial_number' => 'C-24-000002-01',
-                'last_name' => 'Dela Cruz',
-                'first_name' => 'Juan',
-                'middle_name' => 'Reyes',
-                'course' => 'BSCS',
-                'gender' => 'Male',
-                'school_year' => '2024-2025',
-                'contact_number' => '09181234502',
-                'email' => 'juan.delacruz@evsu.edu.ph',
-                'birth_date' => '2003-11-25',
-                'city_address' => 'Palo',
-                'province_address' => 'Leyte',
-            ],
-            [
-                'id' => 3,
-                'serial_number' => 'C-24-000003-01',
-                'last_name' => 'Gonzales',
-                'first_name' => 'Ana',
-                'middle_name' => 'Luz',
-                'course' => 'BSED',
-                'gender' => 'Female',
-                'school_year' => '2023-2024',
-                'contact_number' => '09191234503',
-                'email' => 'ana.gonzales@evsu.edu.ph',
-                'birth_date' => '2004-01-15',
-                'city_address' => 'Ormoc City',
-                'province_address' => 'Leyte',
-            ],
-        ];
+        $this->resetPage();
     }
 
-    public function deleteStudent(int $id): void
+    public function store(): void
     {
-        $this->toast('success', 'Student record deleted successfully.');
+        $this->createForm->store();
+
+        $this->toast('success', 'New student added successfully.');
+        $this->dispatch('close-modal', 'create-modal');
+    }
+
+    public function editStudent(Student $student): void
+    {
+        $this->updateForm->setStudent($student);
+        $this->resetValidation();
+        $this->dispatch('open-modal', 'edit-modal');
+    }
+
+    public function update(): void
+    {
+        $this->updateForm->update();
+
+        $this->toast('success', 'Student record updated successfully.');
+        $this->dispatch('close-modal', 'edit-modal');
+    }
+
+    public function deleteStudent(Student $student): void
+    {
+        $student->delete();
+        $this->toast('success', 'Student record removed.');
     }
 
     public function clearFilters(): void
     {
         $this->reset(['search', 'gender', 'schoolYear']);
+        $this->resetPage();
+    }
+
+    #[Computed]
+    public function students()
+    {
+        return Student::with('schoolYear')
+            ->where('nstp_component', NstpComponent::CWTS)
+            ->when($this->search, function (Builder $query) {
+                $query->where(function (Builder $q) {
+                    $q->where('last_name', 'ilike', '%' . $this->search . '%')
+                      ->orWhere('first_name', 'ilike', '%' . $this->search . '%')
+                      ->orWhere('serial_number', 'ilike', '%' . $this->search . '%')
+                    ;
+                });
+            })
+            ->when($this->gender, fn (Builder $q) => $q->where('gender', $this->gender))
+            ->when($this->schoolYear, function (Builder $q) {
+                [$start, $end] = explode('-', $this->schoolYear);
+                $q->whereHas('schoolYear', function (Builder $sq) use ($start, $end) {
+                    $sq->where('start_year', $start)->where('end_year', $end);
+                });
+            })
+            ->orderBy('last_name')
+            ->paginate(20)
+        ;
+    }
+
+    #[Computed]
+    public function availableSchoolYears()
+    {
+        return SchoolYear::orderByDesc('start_year')->get();
     }
 
     public function render()
     {
+        $baseQuery = Student::where('nstp_component', NstpComponent::CWTS);
+
         return view('livewire.cwts-students.index', [
-            'students' => $this->getMockStudents(),
-            'totalStudents' => 150,
-            'totalMale' => 80,
-            'totalFemale' => 70,
-            'totalCourses' => 6,
-            'schoolYears' => ['2024-2025', '2023-2024', '2022-2023'],
+            'totalStudents' => (clone $baseQuery)->count(),
+            'totalMale' => (clone $baseQuery)->where('gender', Gender::MALE->value)->count(),
+            'totalFemale' => (clone $baseQuery)->where('gender', Gender::FEMALE->value)->count(),
+            'totalCourses' => (clone $baseQuery)->distinct('course')->count('course'),
         ]);
     }
 }
