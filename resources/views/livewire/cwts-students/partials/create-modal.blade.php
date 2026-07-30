@@ -1,4 +1,4 @@
-<x-utils.modal name="create-student" maxWidth="3xl">
+<x-utils.modal name="create-modal" maxWidth="3xl">
     <div x-data="{ activeTab: 'manual' }">
         <div class="bg-[#2d0012] header-pattern px-7 pt-5 pb-0 flex-shrink-0">
             <div class="flex items-start justify-between mb-4">
