@@ -1,23 +1,26 @@
 <?php
 
-declare(strict_types=1);
-
 namespace App\Models;
 
+use App\Enums\Course;
 use App\Enums\Gender;
+use App\Enums\NstpComponent;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 class Student extends Model
 {
+    /**
+     * @var list<string>
+     */
     protected $fillable = [
-        'user_id',
-        'course_id',
         'school_year_id',
+        'nstp_component',
         'serial_number',
         'first_name',
         'middle_name',
         'last_name',
+        'course',
         'gender',
         'birth_date',
         'city_address',
@@ -26,28 +29,16 @@ class Student extends Model
         'email',
     ];
 
+    /**
+     * @return array<string, string|class-string>
+     */
     protected function casts(): array
     {
         return [
+            'nstp_component' => NstpComponent::class,
             'gender' => Gender::class,
             'birth_date' => 'date',
         ];
-    }
-
-    /**
-     * @return BelongsTo<User, $this>
-     */
-    public function user(): BelongsTo
-    {
-        return $this->belongsTo(User::class);
-    }
-
-    /**
-     * @return BelongsTo<Course, $this>
-     */
-    public function course(): BelongsTo
-    {
-        return $this->belongsTo(Course::class);
     }
 
     /**
@@ -56,6 +47,11 @@ class Student extends Model
     public function schoolYear(): BelongsTo
     {
         return $this->belongsTo(SchoolYear::class);
+    }
+
+    public function getCourseLabelAttribute(): string
+    {
+        return Course::getLabel($this->course);
     }
 
     public function getFullNameAttribute(): string

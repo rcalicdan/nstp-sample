@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Livewire\CwtsStudents;
 
 use App\Traits\WithToast;
@@ -12,7 +14,9 @@ class Index extends Component
     use WithToast;
 
     public string $search = '';
+
     public string $gender = '';
+
     public string $schoolYear = '';
 
     /**

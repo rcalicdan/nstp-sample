@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 use App\Livewire\Auth\LoginPage;
 use App\Livewire\CwtsStudents\Index as CwtsStudentsIndex;
 use App\Services\AuthService;
@@ -19,6 +21,7 @@ Route::middleware('auth')->group(function () {
 
     Route::post('/logout', function (AuthService $authService) {
         $authService->logout();
+
         return redirect()->route('login');
     })->name('logout');
 });
