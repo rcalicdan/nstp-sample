@@ -16,6 +16,7 @@ use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Str;
 use Livewire\Attributes\Computed;
 use Livewire\Attributes\Layout;
+use Livewire\Attributes\Url; 
 use Livewire\Component;
 use Livewire\WithPagination;
 
@@ -29,15 +30,20 @@ class Index extends Component
 
     public UpdateForm $updateForm;
 
+    #[Url(except: '')]
     public string $search = '';
 
+    #[Url(except: '')]
     public string $gender = '';
 
+    #[Url(except: '')]
     public string $schoolYear = '';
 
-    public function updatingSearch(): void
+    public function updated($property): void
     {
-        $this->resetPage();
+        if (\in_array($property, ['search', 'gender', 'schoolYear'], true)) {
+            $this->resetPage();
+        }
     }
 
     public function store(): void

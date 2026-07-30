@@ -50,9 +50,17 @@ class UpdateForm extends Form
             'birth_date' => ['nullable', 'date_format:Y-m-d'],
             'city_address' => ['nullable', 'string', 'max:200'],
             'province_address' => ['nullable', 'string', 'max:200'],
-            'contact_number' => ['nullable', 'string', 'max:50'],
+            'contact_number' => ['nullable', 'string', 'regex:/^(09|\+639)\d{9}$/'],
             'email' => ['nullable', 'email', 'max:255', Rule::unique('students')->ignore($this->student?->id)],
             'school_year' => ['required', 'string', 'regex:/^\d{4}-\d{4}$/'],
+        ];
+    }
+
+    public function messages(): array
+    {
+        return [
+            'school_year.regex' => 'The school year format must be YYYY-YYYY without spaces (e.g., 2024-2025).',
+            'contact_number.regex' => 'Please enter a valid PH mobile number starting with 09 (11 digits) or +639 (e.g., 09171234567 or +639171234567).',
         ];
     }
 
@@ -86,7 +94,7 @@ class UpdateForm extends Form
 
     private function resolveSchoolYearId(string $schoolYearString): int
     {
-        [$start, $end] = explode('-', $schoolYearString);
+        [$start, $end] = explode('-', trim($schoolYearString));
 
         return SchoolYear::firstOrCreate([
             'start_year' => (int) $start,

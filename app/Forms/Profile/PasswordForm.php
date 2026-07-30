@@ -5,40 +5,33 @@ declare(strict_types=1);
 namespace App\Forms\Profile;
 
 use App\Models\User;
-use Illuminate\Validation\Rule;
+use Illuminate\Support\Facades\Hash;
 use Livewire\Form;
 
-class ProfileForm extends Form
+class PasswordForm extends Form
 {
-    public ?User $user = null;
+    public string $current_password = '';
 
-    public string $first_name = '';
+    public string $new_password = '';
 
-    public string $last_name = '';
-
-    public string $email = '';
+    public string $new_password_confirmation = '';
 
     public function rules(): array
     {
         return [
-            'first_name' => ['required', 'string', 'max:100'],
-            'last_name' => ['required', 'string', 'max:100'],
-            'email' => ['required', 'email', 'max:255', Rule::unique('users')->ignore($this->user?->id)],
+            'current_password' => ['required', 'string', 'current_password'],
+            'new_password' => ['required', 'string', 'min:8', 'confirmed'],
         ];
-    }
-
-    public function setUser(User $user): void
-    {
-        $this->user = $user;
-        $this->first_name = $user->first_name;
-        $this->last_name = $user->last_name;
-        $this->email = $user->email;
     }
 
     public function update(User $user): void
     {
-        $this->user = $user;
+        $this->validate();
 
-        $user->update($this->validate());
+        $user->update([
+            'password' => Hash::make($this->new_password),
+        ]);
+
+        $this->reset();
     }
 }
