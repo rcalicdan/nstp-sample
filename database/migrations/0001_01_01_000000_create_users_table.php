@@ -17,18 +17,13 @@ return new class () extends Migration {
     {
         Schema::create('users', function (Blueprint $table) {
             $table->id();
-            $table->string('name');
+            $table->string('first_name');
+            $table->string('last_name');
             $table->string('email')->unique();
             $table->string('password');
             $table->string('role')->default(Role::STAFF->value);
             $table->rememberToken();
             $table->timestamps();
-        });
-
-        Schema::create('password_reset_tokens', function (Blueprint $table) {
-            $table->string('email')->primary();
-            $table->string('token');
-            $table->timestamp('created_at')->nullable();
         });
 
         Schema::create('sessions', function (Blueprint $table) {
@@ -41,7 +36,8 @@ return new class () extends Migration {
         });
 
         DB::table('users')->insert([
-            'name' => 'System Superadmin',
+            'first_name' => 'System',
+            'last_name' => 'Superadmin',
             'email' => 'admin@evsu.edu.ph',
             'password' => Hash::make('12345678'),
             'role' => Role::SUPERADMIN->value,

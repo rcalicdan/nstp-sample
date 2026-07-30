@@ -7,6 +7,7 @@ namespace App\Models;
 use App\Enums\Role;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
+use Illuminate\Support\Str;
 
 class User extends Authenticatable
 {
@@ -16,7 +17,8 @@ class User extends Authenticatable
      * @var list<string>
      */
     protected $fillable = [
-        'name',
+        'first_name',
+        'last_name',
         'email',
         'password',
         'role',
@@ -39,6 +41,19 @@ class User extends Authenticatable
             'password' => 'hashed',
             'role' => Role::class,
         ];
+    }
+
+    public function getNameAttribute(): string
+    {
+        return (string) Str::of("{$this->first_name} {$this->last_name}")->squish();
+    }
+
+    public function getInitialsAttribute(): string
+    {
+        $first = Str::of($this->first_name)->take(1)->upper();
+        $last = Str::of($this->last_name)->take(1)->upper();
+
+        return "{$first}{$last}";
     }
 
     public function isSuperAdmin(): bool

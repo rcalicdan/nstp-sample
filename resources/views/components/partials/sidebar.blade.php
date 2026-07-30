@@ -78,10 +78,13 @@
     <div x-data="{
         userName: @js(auth()->user()->name),
         userRole: @js(auth()->user()->role->label()),
-        get initials() {
-            return this.userName.substring(0, 2).toUpperCase();
-        }
-    }" @profile-updated.window="userName = $event.detail.name"
+        initials: @js(auth()->user()->initials)
+    }"
+        @profile-updated.window="
+            userName = $event.detail.name;
+            const parts = userName.trim().split(' ');
+            initials = parts.length >= 2 ? (parts[0][0] + parts[parts.length - 1][0]).toUpperCase() : userName.substring(0, 2).toUpperCase();
+        "
         class="p-3 border-t border-[#4a001c] bg-[#150008]/40 flex items-center justify-between gap-2">
         <a href="{{ route('profile.index') }}" wire:navigate
             class="flex items-center gap-3 overflow-hidden flex-1 group">

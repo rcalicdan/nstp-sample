@@ -1,9 +1,6 @@
 <div>
     <x-slot:header>
-        <x-partials.header 
-            title="Account Profile" 
-            subtitle="Manage your personal information and security settings"
-        />
+        <x-partials.header title="Account Profile" subtitle="Manage your personal information and security settings" />
     </x-slot:header>
 
     <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
@@ -16,17 +13,17 @@
                 <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
                     <div>
                         <x-form.label required>First Name</x-form.label>
-                        <x-form.input wire:model="first_name" :error="$errors->first('first_name')" />
+                        <x-form.input wire:model="profileForm.first_name" :error="$errors->first('profileForm.first_name')" />
                     </div>
                     <div>
                         <x-form.label required>Last Name</x-form.label>
-                        <x-form.input wire:model="last_name" :error="$errors->first('last_name')" />
+                        <x-form.input wire:model="profileForm.last_name" :error="$errors->first('profileForm.last_name')" />
                     </div>
                 </div>
 
                 <div>
                     <x-form.label required>Email Address</x-form.label>
-                    <x-form.input type="email" wire:model="email" :error="$errors->first('email')" />
+                    <x-form.input type="email" wire:model="profileForm.email" :error="$errors->first('profileForm.email')" />
                 </div>
 
                 <div class="pt-2 flex justify-end">
@@ -45,17 +42,17 @@
             <form wire:submit="updatePassword" class="p-6 space-y-4">
                 <div>
                     <x-form.label required>Current Password</x-form.label>
-                    <x-form.input type="password" wire:model="current_password" :error="$errors->first('current_password')" />
+                    <x-form.input type="password" wire:model="passwordForm.current_password" :error="$errors->first('passwordForm.current_password')" />
                 </div>
 
                 <div>
                     <x-form.label required>New Password</x-form.label>
-                    <x-form.input type="password" wire:model="new_password" :error="$errors->first('new_password')" />
+                    <x-form.input type="password" wire:model="passwordForm.new_password" :error="$errors->first('passwordForm.new_password')" />
                 </div>
 
                 <div>
                     <x-form.label required>Confirm New Password</x-form.label>
-                    <x-form.input type="password" wire:model="new_password_confirmation" />
+                    <x-form.input type="password" wire:model="passwordForm.new_password_confirmation" />
                 </div>
 
                 <div class="pt-2 flex justify-end">
