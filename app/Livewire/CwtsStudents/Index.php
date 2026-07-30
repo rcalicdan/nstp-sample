@@ -88,7 +88,7 @@ class Index extends Component
                     ;
                 });
             })
-            ->when($this->gender, fn(Builder $q) => $q->where('gender', $this->gender))
+            ->when($this->gender, fn (Builder $q) => $q->where('gender', $this->gender))
             ->when($this->schoolYear, function (Builder $q) {
                 [$start, $end] = explode('-', $this->schoolYear);
                 $q->whereHas('schoolYear', function (Builder $sq) use ($start, $end) {
@@ -106,7 +106,7 @@ class Index extends Component
         return array_map(function (Course $course) {
             return (object) [
                 'value' => $course->value,
-                'label' => $course->value . ' - ' . Str::limit($course->label(), 42)
+                'label' => $course->value . ' - ' . Str::limit($course->label(), 42),
             ];
         }, Course::cases());
     }
@@ -121,7 +121,6 @@ class Index extends Component
             ];
         }, Gender::cases());
     }
-
 
     #[Computed]
     public function availableSchoolYears()
