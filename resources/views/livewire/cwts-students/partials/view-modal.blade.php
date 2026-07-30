@@ -9,9 +9,9 @@
                         <span class="inline-flex items-center text-[0.68rem] font-bold tracking-wider px-2 py-0.5 rounded bg-[#f9c22e]/20 text-[#fde68a] border border-[#f9c22e]/30 uppercase mb-2 block w-fit">
                             CWTS Student
                         </span>
-                        <h2 x-text="`${selectedStudent.first_name} ${selectedStudent.middle_name ? selectedStudent.middle_name + ' ' : ''}${selectedStudent.last_name}`" class="text-white font-display text-xl tracking-wide leading-snug"></h2>
-                        <p x-text="selectedStudent.course" class="text-[#e8b4c4]/60 text-xs font-body mt-0.5 uppercase tracking-widest"></p>
-                        <p x-text="selectedStudent.serial_number" class="text-[#f9c22e]/80 text-xl font-mono mt-1 tracking-wider font-semibold"></p>
+                        <h2 x-text="`${selectedStudent?.first_name || ''} ${selectedStudent?.middle_name ? selectedStudent.middle_name + ' ' : ''}${selectedStudent?.last_name || ''}`" class="text-white font-display text-xl tracking-wide leading-snug"></h2>
+                        <p x-text="selectedStudent?.course || '—'" class="text-[#e8b4c4]/60 text-xs font-body mt-0.5 uppercase tracking-widest"></p>
+                        <p x-text="selectedStudent?.serial_number || '—'" class="text-[#f9c22e]/80 text-xl font-mono mt-1 tracking-wider font-semibold"></p>
                     </div>
                 </div>
                 <div class="flag-stripe w-full mt-5 rounded opacity-50"></div>
@@ -20,15 +20,15 @@
             <div class="mt-6 mx-5 grid grid-cols-3 bg-white rounded border border-[#f9e6ec] shadow-md overflow-hidden mb-1">
                 <div class="px-3 py-3 text-center">
                     <p class="text-[10px] font-display tracking-widest uppercase text-gray-400">Gender</p>
-                    <p x-text="selectedStudent.gender" class="text-sm font-display text-[#4a001c] mt-0.5 tracking-wide"></p>
+                    <p x-text="typeof selectedStudent?.gender === 'object' ? selectedStudent?.gender?.value : (selectedStudent?.gender || '—')" class="text-sm font-display text-[#4a001c] mt-0.5 tracking-wide"></p>
                 </div>
                 <div class="px-3 py-3 text-center border-x border-[#fdf2f5]">
                     <p class="text-[10px] font-display tracking-widest uppercase text-gray-400">Birthdate</p>
-                    <p x-text="selectedStudent.birth_date ? selectedStudent.birth_date.substring(0, 10) : '—'" class="text-sm font-display text-[#4a001c] mt-0.5 tracking-wide"></p>
+                    <p x-text="selectedStudent?.birth_date ? String(selectedStudent.birth_date).substring(0, 10) : '—'" class="text-sm font-display text-[#4a001c] mt-0.5 tracking-wide"></p>
                 </div>
                 <div class="px-3 py-3 text-center">
                     <p class="text-[10px] font-display tracking-widest uppercase text-gray-400">SY</p>
-                    <p x-text="schoolYearLabel" class="text-sm font-display text-[#4a001c] mt-0.5 tracking-wide"></p>
+                    <p x-text="selectedStudent?.school_year ? `${selectedStudent.school_year.start_year}-${selectedStudent.school_year.end_year}` : '—'" class="text-sm font-display text-[#4a001c] mt-0.5 tracking-wide"></p>
                 </div>
             </div>
 
@@ -39,7 +39,7 @@
                     </div>
                     <div>
                         <p class="text-[10px] font-display uppercase tracking-widest text-gray-400">Address</p>
-                        <p x-text="`${selectedStudent.city_address || ''} ${selectedStudent.city_address && selectedStudent.province_address ? ',' : ''} ${selectedStudent.province_address || ''}` || '—'" class="text-sm text-[#4a001c] font-body mt-0.5"></p>
+                        <p x-text="`${selectedStudent?.city_address || ''}${selectedStudent?.city_address && selectedStudent?.province_address ? ', ' : ''}${selectedStudent?.province_address || ''}` || '—'" class="text-sm text-[#4a001c] font-body mt-0.5"></p>
                     </div>
                 </div>
                 <div class="flex items-start gap-3">
@@ -48,7 +48,7 @@
                     </div>
                     <div>
                         <p class="text-[10px] font-display uppercase tracking-widest text-gray-400">Contact No.</p>
-                        <p x-text="selectedStudent.contact_number || '—'" class="text-sm text-[#4a001c] font-body mt-0.5"></p>
+                        <p x-text="selectedStudent?.contact_number || '—'" class="text-sm text-[#4a001c] font-body mt-0.5"></p>
                     </div>
                 </div>
                 <div class="flex items-start gap-3">
@@ -57,7 +57,7 @@
                     </div>
                     <div>
                         <p class="text-[10px] font-display uppercase tracking-widest text-gray-400">Email Address</p>
-                        <p x-text="selectedStudent.email || '—'" class="text-sm text-[#4a001c] font-body mt-0.5 break-all"></p>
+                        <p x-text="selectedStudent?.email || '—'" class="text-sm text-[#4a001c] font-body mt-0.5 break-all"></p>
                     </div>
                 </div>
             </div>
