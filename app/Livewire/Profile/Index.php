@@ -4,8 +4,8 @@ declare(strict_types=1);
 
 namespace App\Livewire\Profile;
 
-use App\Livewire\Forms\PasswordForm;
-use App\Livewire\Forms\ProfileForm;
+use App\Forms\Profile\PasswordForm;
+use App\Forms\Profile\ProfileForm;
 use App\Traits\WithToast;
 use Livewire\Attributes\Layout;
 use Livewire\Component;

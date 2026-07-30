@@ -3,7 +3,7 @@
     'subtitle' => 'National Service Training Program · Civic Welfare Training Service',
 ])
 
-<header class="bg-[#2d0012] header-pattern shadow-lg border-b border-[#4a001c] w-full">
+<header x-data class="bg-[#2d0012] header-pattern shadow-lg border-b border-[#4a001c] w-full">
     <div class="px-6 py-5 flex items-center justify-between w-full">
         <div class="flex items-center gap-4">
             <button @click="toggleSidebar()" type="button"

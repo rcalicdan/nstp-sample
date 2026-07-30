@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace App\Livewire\Forms;
+namespace App\Forms\Profile;
 
 use App\Models\User;
 use Illuminate\Validation\Rule;
