@@ -1,22 +1,15 @@
 <div>
     <x-slot:header>
-        <x-partials.header 
-            title="EVSU NSTP – CWTS" 
-            subtitle="National Service Training Program · Civic Welfare Training Service"
-        >
+        <x-partials.header title="EVSU NSTP – CWTS"
+            subtitle="National Service Training Program · Civic Welfare Training Service">
             <x-slot:actions>
                 @can('create', App\Models\Student::class)
-                <x-utils.button 
-                    type="button" 
-                    color="gold" 
-                    size="md" 
-                    @click="$dispatch('open-student-modal')"
-                >
-                    <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" d="M12 4v16m8-8H4" />
-                    </svg>
-                    <span class="hidden sm:inline">Add New Data</span>
-                </x-utils.button>
+                    <x-utils.button type="button" color="gold" size="md" @click="$dispatch('open-create-modal')">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M12 4v16m8-8H4" />
+                        </svg>
+                        <span class="hidden sm:inline">Add New Data</span>
+                    </x-utils.button>
                 @endcan
             </x-slot:actions>
         </x-partials.header>
@@ -33,8 +26,7 @@
     }"
         @open-view-modal.window="selectedStudent = $event.detail.student; $dispatch('open-modal', 'view-modal')"
         @open-edit-modal.window="selectedStudent = $event.detail.student; activeTab = 'manual'; $dispatch('open-modal', 'edit-modal')"
-        @open-student-modal.window="selectedStudent = null; activeTab = 'manual'; $dispatch('open-modal', 'create-modal')"
-    >
+        @open-create-modal.window="selectedStudent = null; activeTab = 'manual'; $dispatch('open-modal', 'create-modal')">
         <div class="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-7">
             <x-ui.stat-card title="Total Student/s" :value="$totalStudents" bg="bg-[#2d0012]" textColor="text-[#f9c22e]" />
             <x-ui.stat-card title="Male" :value="$totalMale" bg="bg-[#4a001c]" textColor="text-white" />
@@ -95,54 +87,71 @@
                 <x-table.tbody>
                     @forelse($students as $index => $student)
                         <x-table.tr>
-                            <x-table.td class="text-xs text-[#800033] font-mono font-bold tracking-wide">{{ $student['serial_number'] }}</x-table.td>
-                            <x-table.td class="font-semibold text-[#2d0012] uppercase text-xs tracking-wide">{{ $student['last_name'] }}</x-table.td>
+                            <x-table.td
+                                class="text-xs text-[#800033] font-mono font-bold tracking-wide">{{ $student['serial_number'] }}</x-table.td>
+                            <x-table.td
+                                class="font-semibold text-[#2d0012] uppercase text-xs tracking-wide">{{ $student['last_name'] }}</x-table.td>
                             <x-table.td class="text-[#4a001c] text-sm">{{ $student['first_name'] }}</x-table.td>
-                            <x-table.td class="text-gray-400 text-xs hidden sm:table-cell">{{ $student['middle_name'] }}</x-table.td>
+                            <x-table.td
+                                class="text-gray-400 text-xs hidden sm:table-cell">{{ $student['middle_name'] }}</x-table.td>
                             <x-table.td class="hidden md:table-cell">
-                                <span class="inline-flex items-center text-[0.68rem] font-bold tracking-wider px-2 py-0.5 rounded bg-[#2d0012]/10 text-[#4a001c] border border-[#f9e6ec] uppercase">
+                                <span
+                                    class="inline-flex items-center text-[0.68rem] font-bold tracking-wider px-2 py-0.5 rounded bg-[#2d0012]/10 text-[#4a001c] border border-[#f9e6ec] uppercase">
                                     {{ $student['course'] }}
                                 </span>
                             </x-table.td>
                             <x-table.td class="hidden md:table-cell">
                                 @if ($student['gender'] === 'Male')
-                                    <span class="inline-flex items-center text-[0.68rem] font-bold tracking-wider px-2 py-0.5 rounded bg-blue-50 text-blue-700 border border-blue-200 uppercase">Male</span>
+                                    <span
+                                        class="inline-flex items-center text-[0.68rem] font-bold tracking-wider px-2 py-0.5 rounded bg-blue-50 text-blue-700 border border-blue-200 uppercase">Male</span>
                                 @elseif($student['gender'] === 'Female')
-                                    <span class="inline-flex items-center text-[0.68rem] font-bold tracking-wider px-2 py-0.5 rounded bg-pink-50 text-pink-700 border border-pink-200 uppercase">Female</span>
+                                    <span
+                                        class="inline-flex items-center text-[0.68rem] font-bold tracking-wider px-2 py-0.5 rounded bg-pink-50 text-pink-700 border border-pink-200 uppercase">Female</span>
                                 @else
-                                    <span class="inline-flex items-center text-[0.68rem] font-bold tracking-wider px-2 py-0.5 rounded bg-gray-100 text-gray-500 border border-gray-200 uppercase">{{ $student['gender'] }}</span>
+                                    <span
+                                        class="inline-flex items-center text-[0.68rem] font-bold tracking-wider px-2 py-0.5 rounded bg-gray-100 text-gray-500 border border-gray-200 uppercase">{{ $student['gender'] }}</span>
                                 @endif
                             </x-table.td>
-                            <x-table.td class="text-gray-500 text-xs hidden lg:table-cell">{{ $student['school_year'] }}</x-table.td>
-                            <x-table.td class="text-gray-400 text-xs hidden xl:table-cell">{{ $student['contact_number'] }}</x-table.td>
+                            <x-table.td
+                                class="text-gray-500 text-xs hidden lg:table-cell">{{ $student['school_year'] }}</x-table.td>
+                            <x-table.td
+                                class="text-gray-400 text-xs hidden xl:table-cell">{{ $student['contact_number'] }}</x-table.td>
                             <x-table.td align="center">
                                 <div class="flex items-center justify-center gap-1.5">
                                     <x-utils.view-button
-                                        @click='$dispatch("open-view-modal", { student: @json($student) })' />
+                                        @click="selectedStudent = students[{{ $index }}]; $dispatch('open-modal', 'view-modal')" />
 
                                     @can('update', App\Models\Student::class)
                                         <x-utils.edit-button
-                                            @click='$dispatch("open-edit-modal", { student: @json($student) })' />
+                                            @click="selectedStudent = students[{{ $index }}]; activeTab = 'manual'; $dispatch('open-modal', 'edit-modal')" />
                                     @endcan
 
                                     @can('delete', App\Models\Student::class)
-                                        <x-utils.delete-button :message="'Are you sure you want to permanently remove ' . $student['first_name'] . ' ' . $student['last_name'] . '?'"
+                                        <x-utils.delete-button :message="'Are you sure you want to permanently remove ' .
+                                            $student['first_name'] .
+                                            ' ' .
+                                            $student['last_name'] .
+                                            '?'"
                                             wire:click="deleteStudent({{ $student['id'] }})" />
                                     @endcan
                                 </div>
                             </x-table.td>
                         </x-table.tr>
                     @empty
-                        <x-table.empty colspan="9" title="No Trainees Found" description="Adjust your search or filters." />
+                        <x-table.empty colspan="9" title="No Trainees Found"
+                            description="Adjust your search or filters." />
                     @endforelse
                 </x-table.tbody>
             </x-table.main>
 
             <x-slot:footer>
                 <div class="flex items-center gap-1">
-                    <button type="button" class="w-8 h-8 rounded flex items-center justify-center text-sm font-display text-gray-300 cursor-not-allowed bg-gray-50">‹</button>
-                    <button type="button" class="w-8 h-8 rounded text-sm font-display bg-[#4a001c] text-[#f9c22e] shadow">1</button>
-                    <button type="button" class="w-8 h-8 rounded flex items-center justify-center text-sm font-display text-gray-300 cursor-not-allowed bg-gray-50">›</button>
+                    <button type="button"
+                        class="w-8 h-8 rounded flex items-center justify-center text-sm font-display text-gray-300 cursor-not-allowed bg-gray-50">‹</button>
+                    <button type="button"
+                        class="w-8 h-8 rounded text-sm font-display bg-[#4a001c] text-[#f9c22e] shadow">1</button>
+                    <button type="button"
+                        class="w-8 h-8 rounded flex items-center justify-center text-sm font-display text-gray-300 cursor-not-allowed bg-gray-50">›</button>
                 </div>
             </x-slot:footer>
         </x-ui.table-card>
