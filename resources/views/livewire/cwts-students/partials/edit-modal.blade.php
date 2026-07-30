@@ -44,8 +44,8 @@
                         <x-form.select wire:model="updateForm.course" :error="$errors->first('updateForm.course')">
                             <option value="">Select Course</option>
                             @foreach (\App\Enums\Course::cases() as $course)
-                                <option value="{{ $course->value }}">{{ $course->value }} - {{ $course->label() }}
-                                </option>
+                                <option value="{{ $course->value }}">{{ $course->value }} -
+                                    {{ \Illuminate\Support\Str::limit($course->label(), 42) }}</option>
                             @endforeach
                         </x-form.select>
                     </div>
