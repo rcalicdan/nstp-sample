@@ -17,7 +17,6 @@
     </x-slot:header>
 
     <div x-data="{
-        students: @js($this->students->items()),
         selectedStudent: null,
         activeTab: 'manual',
         get initials() {
@@ -51,8 +50,8 @@
             <select wire:model.live="gender"
                 class="border border-[#f9e6ec] rounded px-3 py-2.5 text-sm bg-[#fdf2f5]/50 min-w-[130px] transition focus:border-[#800033] focus:outline-none">
                 <option value="">All Genders</option>
-                @foreach (\App\Enums\Gender::cases() as $genderOption)
-                    <option value="{{ $genderOption->value }}">{{ $genderOption->value }}</option>
+                @foreach ($this->genderOptions as $genderOption)
+                    <option value="{{ $genderOption->value }}">{{ $genderOption->label }}</option>
                 @endforeach
             </select>
 
@@ -87,7 +86,7 @@
                 </x-table.thead>
 
                 <x-table.tbody>
-                    @forelse($this->students as $index => $student)
+                    @forelse($this->students as $student)
                         <x-table.tr wire:key="student-{{ $student->id }}">
                             <x-table.td
                                 class="text-xs text-[#800033] font-mono font-bold tracking-wide">{{ $student->serial_number }}</x-table.td>
@@ -121,17 +120,14 @@
                                 class="text-gray-400 text-xs hidden xl:table-cell">{{ $student->contact_number ?? '—' }}</x-table.td>
                             <x-table.td align="center">
                                 <div class="flex items-center justify-center gap-1.5">
-                                    <!-- Instant Client-Side View -->
-                                    <x-utils.view-button
-                                        @click="selectedStudent = students[{{ $index }}]; $dispatch('open-modal', 'view-modal')" />
+                                    <x-utils.view-button data-student="{{ json_encode($student) }}"
+                                        @click="selectedStudent = JSON.parse($el.dataset.student); $dispatch('open-modal', 'view-modal')" />
 
-                                    <!-- Livewire Protected Edit -->
-                                    @can('update', clone $student)
+                                    @can('update', $student)
                                         <x-utils.edit-button wire:click="editStudent({{ $student->id }})" />
                                     @endcan
 
-                                    <!-- Livewire Protected Delete -->
-                                    @can('delete', clone $student)
+                                    @can('delete', $student)
                                         <x-utils.delete-button :message="'Are you sure you want to permanently remove ' .
                                             $student->first_name .
                                             ' ' .

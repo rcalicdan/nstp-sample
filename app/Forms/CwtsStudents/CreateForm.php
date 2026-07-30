@@ -6,6 +6,7 @@ namespace App\Forms\CwtsStudents;
 
 use App\Enums\Gender;
 use App\Enums\NstpComponent;
+use App\Forms\CwtsStudents\Concerns\NormalizesContactNumber;
 use App\Models\SchoolYear;
 use App\Models\Student;
 use Illuminate\Validation\Rule;
@@ -13,6 +14,8 @@ use Livewire\Form;
 
 class CreateForm extends Form
 {
+    use NormalizesContactNumber;
+
     public string $serial_number = '';
 
     public string $last_name = '';
@@ -49,7 +52,11 @@ class CreateForm extends Form
             'birth_date' => ['nullable', 'date_format:Y-m-d'],
             'city_address' => ['nullable', 'string', 'max:200'],
             'province_address' => ['nullable', 'string', 'max:200'],
-            'contact_number' => ['nullable', 'string', 'regex:/^(09|\+639)\d{9}$/'], // PH Mobile format
+            'contact_number' => [
+                'nullable',
+                'string',
+                'regex:/^[0-9+\-]*\d[0-9+\-]*$/',
+            ],
             'email' => ['nullable', 'email', 'max:255', Rule::unique('students', 'email')],
             'school_year' => ['required', 'string', 'regex:/^\d{4}-\d{4}$/'],
         ];
@@ -59,7 +66,7 @@ class CreateForm extends Form
     {
         return [
             'school_year.regex' => 'The school year format must be YYYY-YYYY without spaces (e.g., 2024-2025).',
-            'contact_number.regex' => 'Please enter a valid PH mobile number starting with 09 (11 digits) or +639 (e.g., 09171234567 or +639171234567).',
+            'contact_number.regex' => 'Contact number can only contain digits, plus (+), and dash (-) characters.',
         ];
     }
 
