@@ -75,24 +75,33 @@
         </nav>
     </div>
 
-    <div class="p-3 border-t border-[#4a001c] bg-[#150008]/40">
-        <div class="flex items-center gap-3">
-            <div
-                class="w-9 h-9 rounded-full bg-[#f9c22e] text-[#2d0012] font-display font-bold flex items-center justify-center text-sm shadow flex-shrink-0">
-                {{ strtoupper(substr(auth()->user()->name, 0, 2)) }}
+    <div x-data="{
+        userName: @js(auth()->user()->name),
+        userRole: @js(auth()->user()->role->label()),
+        get initials() {
+            return this.userName.substring(0, 2).toUpperCase();
+        }
+    }" @profile-updated.window="userName = $event.detail.name"
+        class="p-3 border-t border-[#4a001c] bg-[#150008]/40 flex items-center justify-between gap-2">
+        <a href="{{ route('profile.index') }}" wire:navigate
+            class="flex items-center gap-3 overflow-hidden flex-1 group">
+            <div x-text="initials"
+                class="w-9 h-9 rounded-full bg-[#f9c22e] text-[#2d0012] font-display font-bold flex items-center justify-center text-sm shadow flex-shrink-0 group-hover:scale-105 transition">
             </div>
             <div x-show="!sidebarCollapsed" class="overflow-hidden flex-1">
-                <p class="text-xs font-display text-white truncate">{{ auth()->user()->name }}</p>
-                <p class="text-[10px] text-[#f9c22e] font-display uppercase tracking-wider">
-                    {{ auth()->user()->role->label() }}</p>
+                <p x-text="userName"
+                    class="text-xs font-display text-white truncate group-hover:text-[#f9c22e] transition"></p>
+                <p x-text="userRole" class="text-[10px] text-[#f9c22e] font-display uppercase tracking-wider"></p>
             </div>
-            <button x-show="!sidebarCollapsed" @click="$dispatch('open-modal', 'confirm-logout')" type="button"
-                title="Logout" class="text-[#e8b4c4]/60 hover:text-white transition p-1">
-                <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round"
-                        d="M15.75 9V5.25A2.25 2.25 0 0 0 13.5 3h-6a2.25 2.25 0 0 0-2.25 2.25v13.5A2.25 2.25 0 0 0 7.5 21h6a2.25 2.25 0 0 0 2.25-2.25V15m3 0 3-3m0 0-3-3m3 3H9" />
-                </svg>
-            </button>
-        </div>
+        </a>
+
+        <button x-show="!sidebarCollapsed" @click.stop="$dispatch('open-modal', 'confirm-logout')" type="button"
+            title="Logout Account"
+            class="text-[#e8b4c4]/60 hover:text-white transition p-2 rounded-lg hover:bg-[#4a001c]/50 flex-shrink-0">
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round"
+                    d="M15.75 9V5.25A2.25 2.25 0 0 0 13.5 3h-6a2.25 2.25 0 0 0-2.25 2.25v13.5A2.25 2.25 0 0 0 7.5 21h6a2.25 2.25 0 0 0 2.25-2.25V15m3 0 3-3m0 0-3-3m3 3H9" />
+            </svg>
+        </button>
     </div>
 </aside>
