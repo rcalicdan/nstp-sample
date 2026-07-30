@@ -38,7 +38,8 @@
 
                 <p
                     class="text-[10px] font-display tracking-widest uppercase text-[#800033] border-b border-[#f9e6ec] pb-1">
-                    Personal Information</p>
+                    Personal Information
+                </p>
 
                 <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
                     <div>
@@ -58,22 +59,13 @@
                 <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
                     <div>
                         <x-form.label required>Course</x-form.label>
-                        <x-form.select wire:model="createForm.course" :error="$errors->first('createForm.course')">
-                            <option value="">Select Course</option>
-                            @foreach (\App\Enums\Course::cases() as $course)
-                                <option value="{{ $course->value }}">{{ $course->value }} -
-                                    {{ \Illuminate\Support\Str::limit($course->label(), 42) }}</option>
-                            @endforeach
-                        </x-form.select>
+                        <x-form.searchable-select wire:model="createForm.course" :options="$this->courseOptions" valueField="value"
+                            labelField="label" placeholder="Search Course..." :error="$errors->first('createForm.course')" />
                     </div>
                     <div>
                         <x-form.label required>Gender</x-form.label>
-                        <x-form.select wire:model="createForm.gender" :error="$errors->first('createForm.gender')">
-                            <option value="">Select Gender</option>
-                            @foreach (\App\Enums\Gender::cases() as $gender)
-                                <option value="{{ $gender->value }}">{{ $gender->value }}</option>
-                            @endforeach
-                        </x-form.select>
+                        <x-form.searchable-select wire:model="createForm.gender" :options="$this->genderOptions" valueField="value"
+                            labelField="label" placeholder="Select Gender..." :searchable="false" :error="$errors->first('createForm.gender')" />
                     </div>
                     <div>
                         <x-form.label>Birthdate</x-form.label>
@@ -83,7 +75,8 @@
 
                 <p
                     class="text-[10px] font-display tracking-widest uppercase text-[#800033] border-b border-[#f9e6ec] pb-1 pt-2">
-                    Address & Contact</p>
+                    Address & Contact
+                </p>
                 <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
                     <div>
                         <x-form.label>City Address</x-form.label>

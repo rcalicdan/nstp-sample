@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Livewire\CwtsStudents;
 
+use App\Enums\Course;
 use App\Enums\Gender;
 use App\Enums\NstpComponent;
 use App\Forms\CwtsStudents\CreateForm;
@@ -12,6 +13,7 @@ use App\Models\SchoolYear;
 use App\Models\Student;
 use App\Traits\WithToast;
 use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Support\Str;
 use Livewire\Attributes\Computed;
 use Livewire\Attributes\Layout;
 use Livewire\Component;
@@ -81,12 +83,12 @@ class Index extends Component
             ->when($this->search, function (Builder $query) {
                 $query->where(function (Builder $q) {
                     $q->where('last_name', 'ilike', '%' . $this->search . '%')
-                      ->orWhere('first_name', 'ilike', '%' . $this->search . '%')
-                      ->orWhere('serial_number', 'ilike', '%' . $this->search . '%')
+                        ->orWhere('first_name', 'ilike', '%' . $this->search . '%')
+                        ->orWhere('serial_number', 'ilike', '%' . $this->search . '%')
                     ;
                 });
             })
-            ->when($this->gender, fn (Builder $q) => $q->where('gender', $this->gender))
+            ->when($this->gender, fn(Builder $q) => $q->where('gender', $this->gender))
             ->when($this->schoolYear, function (Builder $q) {
                 [$start, $end] = explode('-', $this->schoolYear);
                 $q->whereHas('schoolYear', function (Builder $sq) use ($start, $end) {
@@ -97,6 +99,29 @@ class Index extends Component
             ->paginate(20)
         ;
     }
+
+    #[Computed]
+    public function courseOptions(): array
+    {
+        return array_map(function (Course $course) {
+            return (object) [
+                'value' => $course->value,
+                'label' => $course->value . ' - ' . Str::limit($course->label(), 42)
+            ];
+        }, Course::cases());
+    }
+
+    #[Computed]
+    public function genderOptions(): array
+    {
+        return array_map(function (Gender $gender) {
+            return (object) [
+                'value' => $gender->value,
+                'label' => $gender->value,
+            ];
+        }, Gender::cases());
+    }
+
 
     #[Computed]
     public function availableSchoolYears()
