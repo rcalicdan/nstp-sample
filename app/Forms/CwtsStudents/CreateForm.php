@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace App\Livewire\Forms\CwtsStudents;
+namespace App\Forms\CwtsStudents;
 
 use App\Enums\Gender;
 use App\Enums\NstpComponent;

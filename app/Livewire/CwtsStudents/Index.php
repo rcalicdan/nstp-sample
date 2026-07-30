@@ -6,8 +6,8 @@ namespace App\Livewire\CwtsStudents;
 
 use App\Enums\Gender;
 use App\Enums\NstpComponent;
-use App\Livewire\Forms\CwtsStudents\CreateForm;
-use App\Livewire\Forms\CwtsStudents\UpdateForm;
+use App\Forms\CwtsStudents\CreateForm;
+use App\Forms\CwtsStudents\UpdateForm;
 use App\Models\SchoolYear;
 use App\Models\Student;
 use App\Traits\WithToast;
