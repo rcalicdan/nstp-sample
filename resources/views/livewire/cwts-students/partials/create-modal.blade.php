@@ -108,20 +108,84 @@
                 </div>
             </div>
 
-            <div x-show="activeTab === 'csv'" class="p-7 max-h-[70vh] overflow-y-auto">
-                <div
-                    class="border-2 border-dashed border-[#e8b4c4] rounded-xl bg-gradient-to-br from-[#fdf2f5] to-[#fff8fa] p-12 text-center">
-                    <p class="text-[#2d0012] font-display text-base uppercase mb-1">CSV Uploader Disabled</p>
-                    <p class="text-gray-400 text-sm">We are building this functionality in the next phase.</p>
+            <div x-show="activeTab === 'csv'" class="p-7 space-y-5 max-h-[70vh] overflow-y-auto">
+                <div class="bg-amber-50 border border-amber-200 rounded-lg p-4 flex items-center justify-between">
+                    <div>
+                        <label class="block text-xs font-display tracking-wider uppercase text-amber-900 font-bold">
+                            Duplicate Serial Strategy
+                        </label>
+                        <p class="text-[11px] text-amber-700">What should happen if a student's Serial No. already
+                            exists?</p>
+                    </div>
+                    <div class="flex gap-4 text-xs font-display uppercase tracking-wider">
+                        <label class="flex items-center gap-1.5 cursor-pointer">
+                            <input type="radio" wire:model="duplicateAction" value="skip"
+                                class="text-[#800033] focus:ring-[#800033]">
+                            <span>Skip</span>
+                        </label>
+                        <label class="flex items-center gap-1.5 cursor-pointer">
+                            <input type="radio" wire:model="duplicateAction" value="update"
+                                class="text-[#800033] focus:ring-[#800033]">
+                            <span>Update / Overwrite</span>
+                        </label>
+                    </div>
                 </div>
+
+                <div x-data="{ isDragging: false }" @dragover.prevent="isDragging = true"
+                    @dragleave.prevent="isDragging = false"
+                    @drop.prevent="isDragging = false; $refs.fileInput.files = $event.dataTransfer.files; $refs.fileInput.dispatchEvent(new Event('change'))"
+                    :class="isDragging ? 'border-[#800033] bg-[#fdf2f5]' : 'border-[#e8b4c4] bg-[#fdf2f5]/30'"
+                    class="border-2 border-dashed rounded-xl p-8 text-center transition cursor-pointer"
+                    @click="$refs.fileInput.click()">
+
+                    <input type="file" wire:model="csvFile" x-ref="fileInput" accept=".csv" class="hidden">
+
+                    <div
+                        class="w-12 h-12 bg-[#2d0012]/10 rounded-full flex items-center justify-center mx-auto mb-3 text-[#2d0012]">
+                        <svg class="w-6 h-6" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round"
+                                d="M3 16.5v2.25A2.25 2.25 0 0 0 5.25 21h13.5A2.25 2.25 0 0 0 21 18.75V16.5m-13.5-9L12 3m0 0l4.5 4.5M12 3v13.5" />
+                        </svg>
+                    </div>
+
+                    <p class="text-[#2d0012] font-display text-sm uppercase tracking-wide">
+                        <span wire:loading.remove wire:target="csvFile">Click to upload or drag & drop CSV</span>
+                        <span wire:loading wire:target="csvFile" class="text-[#800033] font-bold">Uploading
+                            file...</span>
+                    </p>
+                    <p class="text-xs text-gray-400 mt-1">Accepts standard .CSV files up to 10MB</p>
+
+                    @if ($csvFile)
+                        <div
+                            class="mt-3 inline-flex items-center gap-2 bg-[#800033] text-white text-xs px-3 py-1.5 rounded-full font-mono">
+                            <span>📄 {{ $csvFile->getClientOriginalName() }}</span>
+                        </div>
+                    @endif
+                </div>
+
+                @error('csvFile')
+                    <span class="text-xs text-red-500 font-semibold block">{{ $message }}</span>
+                @enderror
             </div>
+
 
             <div class="border-t border-[#f9e6ec] px-7 py-4 flex justify-between items-center bg-[#fdf2f5]">
                 <x-utils.button type="button" color="outline" size="sm"
-                    @click="$dispatch('close-modal', 'create-modal')">Cancel</x-utils.button>
+                    @click="$dispatch('close-modal', 'create-modal')">
+                    Cancel
+                </x-utils.button>
+
                 <div x-show="activeTab === 'manual'">
-                    <x-utils.button type="submit" color="primary" size="sm" loadingText="Saving...">Save
-                        Record</x-utils.button>
+                    <x-utils.button type="submit" color="primary" size="sm" loadingText="Saving...">
+                        Save Record
+                    </x-utils.button>
+                </div>
+
+                <div x-show="activeTab === 'csv'">
+                    <x-utils.button type="button" wire:click="importCsv" color="gold" size="sm"
+                        loadingText="Importing CSV..." :disabled="!$csvFile">
+                        Import CSV Records
+                    </x-utils.button>
                 </div>
             </div>
         </form>

@@ -16,6 +16,7 @@ use Generator;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Str;
 
 /**
  * @phpstan-type ImportStats array{imported: int, updated: int, skipped: int}
@@ -39,7 +40,7 @@ use Illuminate\Support\Facades\DB;
  */
 class StudentCsvImportService
 {
-    private const CHUNK_SIZE = 1000;
+    private const int CHUNK_SIZE = 1000;
 
     /**
      * @return array{imported: int, updated: int, skipped: int, errors: list<string>}
@@ -95,7 +96,10 @@ class StudentCsvImportService
         }
 
         /** @var array<string, int> $headerMap */
-        $headerMap = array_flip(array_map(fn ($h) => trim(preg_replace('/[\x00-\x1F\x7F-\xFF]/', '', (string)$h)), $header));
+        $headerMap = array_flip(array_map(
+            fn ($h) => Str::of((string) $h)->replaceMatches('/[\x00-\x1F\x7F-\xFF]/', '')->trim()->toString(),
+            $header
+        ));
 
         $this->validateHeaders($headerMap);
 
@@ -241,17 +245,24 @@ class StudentCsvImportService
 
         if (! empty($toUpdate)) {
             $updateColumns = [
-                'school_year_id', 'first_name', 'middle_name', 'last_name',
-                'course', 'gender', 'birth_date', 'city_address',
-                'province_address', 'contact_number', 'email', 'updated_at',
+                'school_year_id',
+                'first_name',
+                'middle_name',
+                'last_name',
+                'course',
+                'gender',
+                'birth_date',
+                'city_address',
+                'province_address',
+                'contact_number',
+                'email',
+                'updated_at',
             ];
 
             Student::upsert($toUpdate, ['serial_number'], $updateColumns);
             $stats['updated'] += \count($toUpdate);
         }
     }
-
-    /* ─── DATA PARSING & CLEANING HELPERS ───────────────────────────────── */
 
     /**
      * @param array<int, string|null> $row
@@ -287,7 +298,7 @@ class StudentCsvImportService
             'birth_date' => $this->parseBirthDate($this->getValue($row, $headerMap, 'birthdate')),
             'city_address' => $this->cleanValue($this->getValue($row, $headerMap, 'cityAddress')),
             'province_address' => $this->cleanValue($this->getValue($row, $headerMap, 'provinceAddress')),
-            'contact_number' => $this->cleanValue($this->getValue($row, $headerMap, 'contact')),
+            'contact_number' => $this->cleanContactNumber($this->getValue($row, $headerMap, 'contact')),
             'email' => $this->cleanEmail($this->getValue($row, $headerMap, 'email')),
             'created_at' => $now,
             'updated_at' => $now,
@@ -334,7 +345,40 @@ class StudentCsvImportService
      */
     private function getValue(array $row, array $headerMap, string $column): ?string
     {
-        return isset($headerMap[$column], $row[$headerMap[$column]]) ? trim((string)$row[$headerMap[$column]]) : null;
+        if (! isset($headerMap[$column], $row[$headerMap[$column]])) {
+            return null;
+        }
+
+        return Str::trim((string) $row[$headerMap[$column]]);
+    }
+
+    private function cleanContactNumber(?string $value): ?string
+    {
+        $cleaned = $this->cleanValue($value);
+
+        if ($cleaned === null) {
+            return null;
+        }
+
+        $digits = Str::of($cleaned)->replaceMatches('/\D/', '');
+
+        if ($digits->isEmpty()) {
+            return null;
+        }
+
+        if ($digits->startsWith('639') && $digits->length() >= 12) {
+            return (string) $digits->substr(2, 10)->prepend('0');
+        }
+
+        if ($digits->startsWith('09')) {
+            return (string) $digits->substr(0, 11);
+        }
+
+        if ($digits->startsWith('9')) {
+            return (string) $digits->prepend('0')->substr(0, 11);
+        }
+
+        return $cleaned;
     }
 
     private function cleanValue(?string $value): ?string
@@ -342,9 +386,14 @@ class StudentCsvImportService
         if ($value === null) {
             return null;
         }
-        $upper = strtoupper(trim($value));
 
-        return \in_array($upper, ['', 'NI', 'NONE', 'N/A', 'NULL', '-'], true) ? null : trim($value);
+        $string = Str::of($value)->trim();
+
+        if ($string->isEmpty() || \in_array($string->upper()->toString(), ['NI', 'NONE', 'N/A', 'NULL', '-'], true)) {
+            return null;
+        }
+
+        return $string->toString();
     }
 
     private function cleanEmail(?string $value): ?string
@@ -356,7 +405,8 @@ class StudentCsvImportService
 
     private function parseGender(?string $value): Gender
     {
-        $upper = strtoupper(trim((string) $value));
+        $upper = Str::of((string) $value)->trim()->upper()->toString();
+
         if (\in_array($upper, ['M', 'MALE', '1'], true)) {
             return Gender::MALE;
         }
@@ -369,13 +419,15 @@ class StudentCsvImportService
 
     private function parseCourse(?string $value): string
     {
-        $cleaned = strtoupper(trim((string) $value));
+        $cleaned = Str::of((string) $value)->trim()->upper()->toString();
         $legacyAliases = ['BSHRT' => Course::BSHM->value, 'ABECON' => Course::BSECON->value];
+
         if (isset($legacyAliases[$cleaned])) {
             return $legacyAliases[$cleaned];
         }
+
         foreach (Course::cases() as $case) {
-            if (strcasecmp($case->value, $cleaned) === 0) {
+            if (Str::lower($case->value) === Str::lower($cleaned)) {
                 return $case->value;
             }
         }
@@ -391,7 +443,7 @@ class StudentCsvImportService
         }
 
         try {
-            if (preg_match('/^\d{1,2}\/\d{1,2}\/\d{4}$/', $cleaned)) {
+            if (Str::of($cleaned)->test('/^\d{1,2}\/\d{1,2}\/\d{4}$/')) {
                 return Carbon::createFromFormat('d/m/Y', $cleaned)->format('Y-m-d');
             }
 
@@ -403,7 +455,7 @@ class StudentCsvImportService
 
     private function resolveSchoolYearId(string $schoolYearString): int
     {
-        [$start, $end] = explode('-', trim($schoolYearString));
+        [$start, $end] = Str::of($schoolYearString)->trim()->explode('-');
 
         return SchoolYear::firstOrCreate(['start_year' => (int) $start, 'end_year' => (int) $end])->id;
     }

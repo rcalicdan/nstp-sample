@@ -11,6 +11,7 @@ use App\Forms\CwtsStudents\CreateForm;
 use App\Forms\CwtsStudents\UpdateForm;
 use App\Models\SchoolYear;
 use App\Models\Student;
+use App\Services\StudentCsvImportService;
 use App\Traits\WithToast;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Str;
@@ -18,6 +19,7 @@ use Livewire\Attributes\Computed;
 use Livewire\Attributes\Layout;
 use Livewire\Attributes\Url;
 use Livewire\Component;
+use Livewire\WithFileUploads;
 use Livewire\WithPagination;
 
 #[Layout('layouts.app')]
@@ -25,10 +27,15 @@ class Index extends Component
 {
     use WithPagination;
     use WithToast;
+    use WithFileUploads;
 
     public CreateForm $createForm;
 
     public UpdateForm $updateForm;
+
+    public $csvFile = null;
+
+    public string $duplicateAction = 'skip';
 
     #[Url(except: '')]
     public string $search = '';
@@ -43,6 +50,31 @@ class Index extends Component
     {
         if (\in_array($property, ['search', 'gender', 'schoolYear'], true)) {
             $this->resetPage();
+        }
+    }
+
+    public function importCsv(StudentCsvImportService $service): void
+    {
+        $this->validate([
+            'csvFile' => 'required|file|mimes:csv,txt|max:10240',
+            'duplicateAction' => 'required|in:skip,update',
+        ]);
+
+        try {
+            $result = $service->import(
+                file: $this->csvFile,
+                user: auth()->user(),
+                component: NstpComponent::CWTS,
+                duplicateAction: $this->duplicateAction
+            );
+
+            $msg = "Imported: {$result['imported']} | Updated: {$result['updated']} | Skipped: {$result['skipped']}";
+
+            $this->toast('success', $msg);
+            $this->reset(['csvFile', 'duplicateAction']);
+            $this->dispatch('close-modal', 'create-modal');
+        } catch (\Throwable $e) {
+            $this->toast('error', $e->getMessage());
         }
     }
 
