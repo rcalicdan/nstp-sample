@@ -6,7 +6,7 @@ A student registry and management system for the EVSU NSTP-CWTS (National Servic
 
 Before you begin, make sure you have the following installed:
 
-- PHP >= 8.2
+- PHP >= 8.3
 - Composer
 - Node.js >= 18.x and npm
 - MySQL (or your preferred supported database)
@@ -49,7 +49,7 @@ php artisan key:generate
 Open the `.env` file and update the database connection details:
 
 ```env
-DB_CONNECTION=mysql
+DB_CONNECTION=pgsql
 DB_HOST=127.0.0.1
 DB_PORT=3306
 DB_DATABASE=evsu_nstp_cwts
