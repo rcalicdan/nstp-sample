@@ -14,6 +14,8 @@ use App\Models\Student;
 use App\Services\StudentCsvImportService;
 use App\Traits\WithToast;
 use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Database\Eloquent\Collection;
+use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Str;
 use Livewire\Attributes\Computed;
 use Livewire\Attributes\Layout;
@@ -22,12 +24,18 @@ use Livewire\Component;
 use Livewire\WithFileUploads;
 use Livewire\WithPagination;
 
+/**
+ * @phpstan-type StatTotals array{totalStudents: int, totalMale: int, totalFemale: int, totalCourses: int}
+ * @phpstan-type OptionObject object{value: string, label: string}
+ */
 #[Layout('layouts.app')]
 class Index extends Component
 {
+    use WithFileUploads;
     use WithPagination;
     use WithToast;
-    use WithFileUploads;
+
+    private const string STATS_CACHE_KEY = 'nstp_stats_cwts';
 
     public CreateForm $createForm;
 
@@ -68,6 +76,8 @@ class Index extends Component
                 duplicateAction: $this->duplicateAction
             );
 
+            $this->clearStatsCache();
+
             $msg = "Imported: {$result['imported']} | Updated: {$result['updated']} | Skipped: {$result['skipped']}";
 
             $this->toast('success', $msg);
@@ -81,7 +91,7 @@ class Index extends Component
     public function store(): void
     {
         $this->createForm->store();
-
+        $this->clearStatsCache();
         $this->toast('success', 'New student added successfully.');
         $this->dispatch('close-modal', 'create-modal');
     }
@@ -96,7 +106,7 @@ class Index extends Component
     public function update(): void
     {
         $this->updateForm->update();
-
+        $this->clearStatsCache();
         $this->toast('success', 'Student record updated successfully.');
         $this->dispatch('close-modal', 'edit-modal');
     }
@@ -104,6 +114,7 @@ class Index extends Component
     public function deleteStudent(Student $student): void
     {
         $student->delete();
+        $this->clearStatsCache();
         $this->toast('success', 'Student record removed.');
     }
 
@@ -126,7 +137,7 @@ class Index extends Component
                     ;
                 });
             })
-            ->when($this->gender, fn (Builder $q) => $q->where('gender', $this->gender))
+            ->when($this->gender, fn(Builder $q) => $q->where('gender', $this->gender))
             ->when($this->schoolYear, function (Builder $q) {
                 [$start, $end] = explode('-', $this->schoolYear);
                 $q->whereHas('schoolYear', function (Builder $sq) use ($start, $end) {
@@ -138,6 +149,27 @@ class Index extends Component
         ;
     }
 
+    /**
+     * @return StatTotals
+     */
+    #[Computed]
+    public function stats(): array
+    {
+        return Cache::rememberForever(self::STATS_CACHE_KEY, function () {
+            $baseQuery = Student::where('nstp_component', NstpComponent::CWTS);
+
+            return [
+                'totalStudents' => (clone $baseQuery)->count(),
+                'totalMale' => (clone $baseQuery)->where('gender', Gender::MALE->value)->count(),
+                'totalFemale' => (clone $baseQuery)->where('gender', Gender::FEMALE->value)->count(),
+                'totalCourses' => (clone $baseQuery)->distinct('course')->count('course'),
+            ];
+        });
+    }
+
+    /**
+     * @return list<OptionObject>
+     */
     #[Computed]
     public function courseOptions(): array
     {
@@ -149,6 +181,9 @@ class Index extends Component
         }, Course::cases());
     }
 
+    /**
+     * @return list<OptionObject>
+     */
     #[Computed]
     public function genderOptions(): array
     {
@@ -160,6 +195,9 @@ class Index extends Component
         }, Gender::cases());
     }
 
+    /**
+     * @return Collection<int, SchoolYear>
+     */
     #[Computed]
     public function availableSchoolYears()
     {
@@ -168,13 +206,16 @@ class Index extends Component
 
     public function render()
     {
-        $baseQuery = Student::where('nstp_component', NstpComponent::CWTS);
-
         return view('livewire.cwts-students.index', [
-            'totalStudents' => (clone $baseQuery)->count(),
-            'totalMale' => (clone $baseQuery)->where('gender', Gender::MALE->value)->count(),
-            'totalFemale' => (clone $baseQuery)->where('gender', Gender::FEMALE->value)->count(),
-            'totalCourses' => (clone $baseQuery)->distinct('course')->count('course'),
+            'totalStudents' => $this->stats['totalStudents'],
+            'totalMale' => $this->stats['totalMale'],
+            'totalFemale' => $this->stats['totalFemale'],
+            'totalCourses' => $this->stats['totalCourses'],
         ]);
+    }
+
+    private function clearStatsCache(): void
+    {
+        Cache::forget(self::STATS_CACHE_KEY);
     }
 }
