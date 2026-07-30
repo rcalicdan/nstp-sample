@@ -12,6 +12,9 @@ class User extends Authenticatable
 {
     use Notifiable;
 
+    /**
+     * @var list<string>
+     */
     protected $fillable = [
         'name',
         'email',
@@ -19,11 +22,17 @@ class User extends Authenticatable
         'role',
     ];
 
+    /**
+     * @var list<string>
+     */
     protected $hidden = [
         'password',
         'remember_token',
     ];
 
+    /**
+     * @return array<string, string|class-string>
+     */
     protected function casts(): array
     {
         return [

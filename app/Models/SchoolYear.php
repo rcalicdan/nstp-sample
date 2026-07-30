@@ -9,6 +9,9 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class SchoolYear extends Model
 {
+    /**
+     * @var list<string>
+     */
     protected $fillable = [
         'start_year',
         'end_year',
