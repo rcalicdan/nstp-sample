@@ -16,11 +16,13 @@ use Generator;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
 
 /**
  * @phpstan-type ImportStats array{imported: int, updated: int, skipped: int}
  * @phpstan-type ParsedStudentRow array{
+ *     csv_upload_id: int,
  *     school_year_id: int|null,
  *     nstp_component: string,
  *     serial_number: string,
@@ -57,11 +59,58 @@ class StudentCsvImportService
 
         /** @var list<string> $errors */
         $errors = [];
-        $firstSchoolYearId = null;
 
-        $this->processRowsInChunks($csvIterator, $headerMap, $component, $duplicateAction, $stats, $errors, $firstSchoolYearId);
+        $filePath = $file->store('csv_uploads');
 
-        $this->logSuccessfulUpload($file, $fileHash, $user, $firstSchoolYearId, $stats);
+        DB::transaction(function () use ($csvIterator, $headerMap, $component, $duplicateAction, $file, $filePath, $fileHash, $user, &$stats, &$errors) {
+            $csvUpload = CsvUpload::create([
+                'user_id' => $user->id,
+                'school_year_id' => null,
+                'nstp_component' => $component->value,
+                'file_name' => $file->getClientOriginalName(),
+                'file_path' => $filePath,
+                'file_hash' => $fileHash,
+            ]);
+
+            /** @var list<ParsedStudentRow> $chunk */
+            $chunk = [];
+            $rowNumber = 1;
+            $firstSchoolYearId = null;
+
+            while ($csvIterator->valid()) {
+                $row = $csvIterator->current();
+                $rowNumber++;
+                $csvIterator->next();
+
+                if (empty(array_filter($row))) {
+                    continue;
+                }
+
+                $parsedRow = $this->parseRow($row, $headerMap, $component, $csvUpload->id, $rowNumber, $errors);
+
+                if (! $parsedRow) {
+                    continue;
+                }
+
+                $firstSchoolYearId ??= $parsedRow['school_year_id'];
+                $chunk[] = $parsedRow;
+
+                if (\count($chunk) >= self::CHUNK_SIZE) {
+                    $this->processChunk($chunk, $duplicateAction, $stats);
+                    $chunk = [];
+                }
+            }
+
+            if (! empty($chunk)) {
+                $this->processChunk($chunk, $duplicateAction, $stats);
+            }
+
+            $csvUpload->update([
+                'school_year_id' => $firstSchoolYearId,
+                'imported_count' => $stats['imported'],
+                'updated_count' => $stats['updated'],
+            ]);
+        });
 
         return [
             'imported' => $stats['imported'],
@@ -71,12 +120,25 @@ class StudentCsvImportService
         ];
     }
 
+    public function rollback(CsvUpload $csvUpload): void
+    {
+        DB::transaction(function () use ($csvUpload) {
+            Student::where('csv_upload_id', $csvUpload->id)->delete();
+
+            if (Storage::exists($csvUpload->file_path)) {
+                Storage::delete($csvUpload->file_path);
+            }
+
+            $csvUpload->delete();
+        });
+    }
+
     private function guardAgainstDuplicateUpload(UploadedFile $file): string
     {
         $fileHash = hash_file('sha256', $file->getRealPath());
 
         if (CsvUpload::where('file_hash', $fileHash)->exists()) {
-            throw new Exception('This CSV file was already uploaded previously.');
+            throw new Exception('This CSV file content was already uploaded previously.');
         }
 
         return $fileHash;
@@ -97,7 +159,7 @@ class StudentCsvImportService
 
         /** @var array<string, int> $headerMap */
         $headerMap = array_flip(array_map(
-            fn ($h) => Str::of((string) $h)->replaceMatches('/[\x00-\x1F\x7F-\xFF]/', '')->trim()->toString(),
+            fn($h) => Str::of((string) $h)->replaceMatches('/[\x00-\x1F\x7F-\xFF]/', '')->trim()->toString(),
             $header
         ));
 
@@ -106,71 +168,6 @@ class StudentCsvImportService
         $csvIterator->next();
 
         return $headerMap;
-    }
-
-    /**
-     * @param Generator<int, array<int, string|null>> $csvIterator
-     * @param array<string, int> $headerMap
-     * @param ImportStats $stats
-     * @param list<string> $errors
-     */
-    private function processRowsInChunks(
-        Generator $csvIterator,
-        array $headerMap,
-        NstpComponent $component,
-        string $duplicateAction,
-        array &$stats,
-        array &$errors,
-        ?int &$firstSchoolYearId
-    ): void {
-        DB::transaction(function () use ($csvIterator, $headerMap, $component, $duplicateAction, &$stats, &$errors, &$firstSchoolYearId) {
-            /** @var list<ParsedStudentRow> $chunk */
-            $chunk = [];
-            $rowNumber = 1;
-
-            while ($csvIterator->valid()) {
-                $row = $csvIterator->current();
-                $rowNumber++;
-                $csvIterator->next();
-
-                if (empty(array_filter($row))) {
-                    continue;
-                }
-
-                $parsedRow = $this->parseRow($row, $headerMap, $component, $rowNumber, $errors);
-
-                if (! $parsedRow) {
-                    continue;
-                }
-
-                $firstSchoolYearId ??= $parsedRow['school_year_id'];
-                $chunk[] = $parsedRow;
-
-                if (\count($chunk) >= self::CHUNK_SIZE) {
-                    $this->processChunk($chunk, $duplicateAction, $stats);
-                    $chunk = [];
-                }
-            }
-
-            if (! empty($chunk)) {
-                $this->processChunk($chunk, $duplicateAction, $stats);
-            }
-        });
-    }
-
-    /**
-     * @param ImportStats $stats
-     */
-    private function logSuccessfulUpload(UploadedFile $file, string $fileHash, User $user, ?int $schoolYearId, array $stats): void
-    {
-        if ($stats['imported'] > 0 || $stats['updated'] > 0) {
-            CsvUpload::create([
-                'user_id' => $user->id,
-                'school_year_id' => $schoolYearId,
-                'file_path' => $file->store('csv_uploads'),
-                'file_hash' => $fileHash,
-            ]);
-        }
     }
 
     /**
@@ -200,8 +197,7 @@ class StudentCsvImportService
         return Student::whereIn('serial_number', $serials)
             ->pluck('serial_number')
             ->flip()
-            ->toArray()
-        ;
+            ->toArray();
     }
 
     /**
@@ -245,6 +241,7 @@ class StudentCsvImportService
 
         if (! empty($toUpdate)) {
             $updateColumns = [
+                'csv_upload_id',
                 'school_year_id',
                 'first_name',
                 'middle_name',
@@ -271,7 +268,7 @@ class StudentCsvImportService
      *
      * @return ParsedStudentRow|null
      */
-    private function parseRow(array $row, array $headerMap, NstpComponent $component, int $rowNumber, array &$errors): ?array
+    private function parseRow(array $row, array $headerMap, NstpComponent $component, int $csvUploadId, int $rowNumber, array &$errors): ?array
     {
         $serialNumber = $this->getValue($row, $headerMap, 'serialNo');
         $lastName = $this->getValue($row, $headerMap, 'lastName');
@@ -287,6 +284,7 @@ class StudentCsvImportService
         $now = now()->toDateTimeString();
 
         return [
+            'csv_upload_id' => $csvUploadId,
             'school_year_id' => $schoolYearStr ? $this->resolveSchoolYearId($schoolYearStr) : null,
             'nstp_component' => $component->value,
             'serial_number' => $serialNumber,

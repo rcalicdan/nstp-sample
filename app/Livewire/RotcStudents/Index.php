@@ -2,13 +2,13 @@
 
 declare(strict_types=1);
 
-namespace App\Livewire\CwtsStudents;
+namespace App\Livewire\RotcStudents;
 
 use App\Enums\Course;
 use App\Enums\Gender;
 use App\Enums\NstpComponent;
-use App\Forms\CwtsStudents\CreateForm;
-use App\Forms\CwtsStudents\UpdateForm;
+use App\Forms\RotcStudents\CreateForm;
+use App\Forms\RotcStudents\UpdateForm;
 use App\Models\CsvUpload;
 use App\Models\SchoolYear;
 use App\Models\Student;
@@ -37,7 +37,7 @@ class Index extends Component
     use WithPagination;
     use WithToast;
 
-    private const string STATS_CACHE_KEY = 'nstp_stats_cwts';
+    private const string STATS_CACHE_KEY = 'nstp_stats_rotc';
 
     public CreateForm $createForm;
 
@@ -74,7 +74,7 @@ class Index extends Component
             $result = $service->import(
                 file: $this->csvFile,
                 user: auth()->user(),
-                component: NstpComponent::CWTS,
+                component: NstpComponent::ROTC,
                 duplicateAction: $this->duplicateAction
             );
 
@@ -102,7 +102,7 @@ class Index extends Component
     {
         $this->createForm->store();
         $this->clearStatsCache();
-        $this->toast('success', 'New student added successfully.');
+        $this->toast('success', 'New ROTC student added successfully.');
         $this->dispatch('close-modal', 'create-modal');
     }
 
@@ -117,7 +117,7 @@ class Index extends Component
     {
         $this->updateForm->update();
         $this->clearStatsCache();
-        $this->toast('success', 'Student record updated successfully.');
+        $this->toast('success', 'ROTC student record updated successfully.');
         $this->dispatch('close-modal', 'edit-modal');
     }
 
@@ -125,7 +125,7 @@ class Index extends Component
     {
         $student->delete();
         $this->clearStatsCache();
-        $this->toast('success', 'Student record removed.');
+        $this->toast('success', 'ROTC student record removed.');
     }
 
     public function clearFilters(): void
@@ -141,7 +141,7 @@ class Index extends Component
     public function students(): LengthAwarePaginator
     {
         return Student::with('schoolYear')
-            ->where('nstp_component', NstpComponent::CWTS)
+            ->where('nstp_component', NstpComponent::ROTC)
             ->when($this->search, function (Builder $query) {
                 $query->where(function (Builder $q) {
                     $q->where('last_name', 'ilike', '%' . $this->search . '%')
@@ -149,7 +149,7 @@ class Index extends Component
                         ->orWhere('serial_number', 'ilike', '%' . $this->search . '%');
                 });
             })
-            ->when($this->gender, fn(Builder $q) => $q->where('gender', $this->gender))
+            ->when($this->gender, fn (Builder $q) => $q->where('gender', $this->gender))
             ->when($this->schoolYear, function (Builder $q) {
                 if (str_contains($this->schoolYear, '-')) {
                     [$start, $end] = explode('-', $this->schoolYear);
@@ -169,7 +169,7 @@ class Index extends Component
     public function stats(): array
     {
         return Cache::rememberForever(self::STATS_CACHE_KEY, function () {
-            $baseQuery = Student::where('nstp_component', NstpComponent::CWTS);
+            $baseQuery = Student::where('nstp_component', NstpComponent::ROTC);
 
             return [
                 'totalStudents' => (clone $baseQuery)->count(),
@@ -186,11 +186,7 @@ class Index extends Component
     #[Computed]
     public function recentUploads(): Collection
     {
-        return CsvUpload::with(['user', 'schoolYear'])
-            ->where('nstp_component', NstpComponent::ROTC)
-            ->latest()
-            ->take(10)
-            ->get();
+        return CsvUpload::with(['user', 'schoolYear'])->latest()->take(10)->get();
     }
 
     /**
@@ -232,7 +228,7 @@ class Index extends Component
 
     public function render()
     {
-        return view('livewire.cwts-students.index', [
+        return view('livewire.rotc-students.index', [
             'totalStudents' => $this->stats['totalStudents'],
             'totalMale' => $this->stats['totalMale'],
             'totalFemale' => $this->stats['totalFemale'],

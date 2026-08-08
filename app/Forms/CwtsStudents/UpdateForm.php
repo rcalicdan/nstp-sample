@@ -5,7 +5,7 @@ declare(strict_types=1);
 namespace App\Forms\CwtsStudents;
 
 use App\Enums\Gender;
-use App\Forms\CwtsStudents\Concerns\NormalizesContactNumber;
+use App\Forms\Concerns\NormalizesContactNumber;
 use App\Models\SchoolYear;
 use App\Models\Student;
 use Illuminate\Validation\Rule;
@@ -41,6 +41,9 @@ class UpdateForm extends Form
 
     public string $school_year = '';
 
+    /**
+     * @return array<string, mixed>
+     */
     public function rules(): array
     {
         return [
@@ -63,11 +66,14 @@ class UpdateForm extends Form
         ];
     }
 
+    /**
+     * @return array<string, string>
+     */
     public function messages(): array
     {
         return [
             'school_year.regex' => 'The school year format must be YYYY-YYYY without spaces (e.g., 2024-2025).',
-            'Contact number can only contain digits, plus (+), and dash (-) characters.',
+            'contact_number.regex' => 'Contact number can only contain digits, plus (+), and dash (-) characters.',
         ];
     }
 
@@ -92,6 +98,7 @@ class UpdateForm extends Form
     {
         $validated = $this->validate();
 
+        $validated['contact_number'] = $this->normalizeContactNumber($this->contact_number);
         $validated['school_year_id'] = $this->resolveSchoolYearId($this->school_year);
 
         $this->student->update($validated);

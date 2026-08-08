@@ -38,7 +38,7 @@
                 </x-slot:icon>
             </x-utils.nav-link>
 
-            <x-utils.nav-link href="#" :active="request()->routeIs('rotc.*')" title="ROTC Registry">
+            <x-utils.nav-link :href="route('rotc-students.index')" :active="request()->routeIs('rotc-students.*')" title="ROTC Registry">
                 <x-slot:icon>
                     <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round"
@@ -51,8 +51,8 @@
                 class="px-3 text-[10px] text-[#e8b4c4]/40 tracking-widest pt-4 mb-2 whitespace-nowrap">Administration
             </p>
 
-            @if (auth()->user()->isSuperAdmin() || auth()->user()->isAdmin())
-                <x-utils.nav-link href="#" :active="request()->routeIs('users.*')" title="User Management">
+            @can('viewAny', App\Models\User::class)
+                <x-utils.nav-link :href="route('users.index')" :active="request()->routeIs('users.*')" title="User Management">
                     <x-slot:icon>
                         <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round"
@@ -60,7 +60,7 @@
                         </svg>
                     </x-slot:icon>
                 </x-utils.nav-link>
-            @endif
+            @endcan
 
             @if (auth()->user()->isSuperAdmin())
                 <x-utils.nav-link href="#" :active="request()->routeIs('audit-logs.*')" title="Audit Logs">

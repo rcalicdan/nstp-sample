@@ -2,19 +2,20 @@
 
 declare(strict_types=1);
 
-namespace App\Forms\CwtsStudents;
+namespace App\Forms\RotcStudents;
 
 use App\Enums\Gender;
-use App\Enums\NstpComponent;
 use App\Forms\Concerns\NormalizesContactNumber;
 use App\Models\SchoolYear;
 use App\Models\Student;
 use Illuminate\Validation\Rule;
 use Livewire\Form;
 
-class CreateForm extends Form
+class UpdateForm extends Form
 {
     use NormalizesContactNumber;
+
+    public ?Student $student = null;
 
     public string $serial_number = '';
 
@@ -46,7 +47,7 @@ class CreateForm extends Form
     public function rules(): array
     {
         return [
-            'serial_number' => ['required', 'string', 'max:50', Rule::unique('students', 'serial_number')],
+            'serial_number' => ['required', 'string', 'max:50', Rule::unique('students')->ignore($this->student?->id)],
             'last_name' => ['required', 'string', 'max:100'],
             'first_name' => ['required', 'string', 'max:100'],
             'middle_name' => ['nullable', 'string', 'max:100'],
@@ -60,7 +61,7 @@ class CreateForm extends Form
                 'string',
                 'regex:/^[0-9+\-]*\d[0-9+\-]*$/',
             ],
-            'email' => ['nullable', 'email', 'max:255', Rule::unique('students', 'email')],
+            'email' => ['nullable', 'email', 'max:255', Rule::unique('students')->ignore($this->student?->id)],
             'school_year' => ['required', 'string', 'regex:/^\d{4}-\d{4}$/'],
         ];
     }
@@ -76,15 +77,31 @@ class CreateForm extends Form
         ];
     }
 
-    public function store(): void
+    public function setStudent(Student $student): void
+    {
+        $this->student = $student;
+        $this->serial_number = $student->serial_number;
+        $this->last_name = $student->last_name;
+        $this->first_name = $student->first_name;
+        $this->middle_name = $student->middle_name;
+        $this->course = $student->course;
+        $this->gender = $student->gender->value;
+        $this->birth_date = $student->birth_date?->format('Y-m-d');
+        $this->city_address = $student->city_address;
+        $this->province_address = $student->province_address;
+        $this->contact_number = $student->contact_number;
+        $this->email = $student->email;
+        $this->school_year = $student->schoolYear ? $student->schoolYear->label : '';
+    }
+
+    public function update(): void
     {
         $validated = $this->validate();
 
         $validated['contact_number'] = $this->normalizeContactNumber($this->contact_number);
         $validated['school_year_id'] = $this->resolveSchoolYearId($this->school_year);
-        $validated['nstp_component'] = NstpComponent::CWTS->value;
 
-        Student::create($validated);
+        $this->student->update($validated);
 
         $this->reset();
     }

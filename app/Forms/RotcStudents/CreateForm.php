@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace App\Forms\CwtsStudents;
+namespace App\Forms\RotcStudents;
 
 use App\Enums\Gender;
 use App\Enums\NstpComponent;
@@ -82,7 +82,7 @@ class CreateForm extends Form
 
         $validated['contact_number'] = $this->normalizeContactNumber($this->contact_number);
         $validated['school_year_id'] = $this->resolveSchoolYearId($this->school_year);
-        $validated['nstp_component'] = NstpComponent::CWTS->value;
+        $validated['nstp_component'] = NstpComponent::ROTC->value;
 
         Student::create($validated);
 

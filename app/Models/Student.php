@@ -1,7 +1,5 @@
 <?php
 
-declare(strict_types=1);
-
 namespace App\Models;
 
 use App\Enums\Course;
@@ -17,6 +15,7 @@ class Student extends Model
      */
     protected $fillable = [
         'school_year_id',
+        'csv_upload_id',
         'nstp_component',
         'serial_number',
         'first_name',
@@ -49,6 +48,14 @@ class Student extends Model
     public function schoolYear(): BelongsTo
     {
         return $this->belongsTo(SchoolYear::class);
+    }
+
+    /**
+     * @return BelongsTo<CsvUpload, $this>
+     */
+    public function csvUpload(): BelongsTo
+    {
+        return $this->belongsTo(CsvUpload::class);
     }
 
     public function getCourseLabelAttribute(): string

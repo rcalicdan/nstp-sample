@@ -1,7 +1,5 @@
 <?php
 
-declare(strict_types=1);
-
 namespace App\Models;
 
 use App\Enums\Role;
@@ -22,6 +20,7 @@ class User extends Authenticatable
         'email',
         'password',
         'role',
+        'is_active',
     ];
 
     /**
@@ -40,6 +39,7 @@ class User extends Authenticatable
         return [
             'password' => 'hashed',
             'role' => Role::class,
+            'is_active' => 'boolean',
         ];
     }
 
@@ -54,6 +54,22 @@ class User extends Authenticatable
         $last = Str::of($this->last_name)->take(1)->upper();
 
         return "{$first}{$last}";
+    }
+
+    /**
+     * @return list<Role>
+     */
+    public function assignableRoles(): array
+    {
+        if ($this->isSuperAdmin()) {
+            return Role::cases();
+        }
+
+        if ($this->isAdmin()) {
+            return [Role::STAFF];
+        }
+
+        return [];
     }
 
     public function isSuperAdmin(): bool
