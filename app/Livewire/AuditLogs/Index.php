@@ -65,15 +65,18 @@ class Index extends Component
                         ->orWhere('message', 'ilike', '%' . $this->search . '%')
                         ->orWhereHas('user', function (Builder $uq) {
                             $uq->where('first_name', 'ilike', '%' . $this->search . '%')
-                                ->orWhere('last_name', 'ilike', '%' . $this->search . '%');
-                        });
+                                ->orWhere('last_name', 'ilike', '%' . $this->search . '%')
+                            ;
+                        })
+                    ;
                 });
             })
             ->when($this->eventFilter, fn (Builder $q) => $q->where('event', $this->eventFilter))
             ->when($this->dateFrom, fn (Builder $q) => $q->whereDate('created_at', '>=', $this->dateFrom))
             ->when($this->dateTo, fn (Builder $q) => $q->whereDate('created_at', '<=', $this->dateTo))
             ->latest()
-            ->paginate(20);
+            ->paginate(20)
+        ;
     }
 
     public function render()

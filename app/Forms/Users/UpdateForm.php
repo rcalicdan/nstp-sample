@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 namespace App\Forms\Users;
 
-use App\Enums\Role;
 use App\Models\User;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Validation\Rule;
@@ -15,10 +14,15 @@ class UpdateForm extends Form
     public ?User $targetUser = null;
 
     public string $first_name = '';
+
     public string $last_name = '';
+
     public string $email = '';
+
     public string $password = '';
+
     public string $role = '';
+
     public bool $is_active = true;
 
     /**

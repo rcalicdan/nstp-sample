@@ -74,7 +74,7 @@ class AuditLogger
         $newValues = static::filterAttributes($newValues, $excludedAttributes);
 
         AuditLog::create([
-            'auditable_type' => get_class($model),
+            'auditable_type' => \get_class($model),
             'auditable_id' => $model->getKey(),
             'event' => $event,
             'old_values' => $oldValues,
@@ -109,6 +109,7 @@ class AuditLogger
     /**
      * @param array<string, mixed> $original
      * @param array<string, mixed> $current
+     *
      * @return array{old: array<string, mixed>, new: array<string, mixed>}
      */
     protected static function getChanges(array $original, array $current): array
@@ -117,7 +118,7 @@ class AuditLogger
         $newValues = [];
 
         foreach ($current as $key => $value) {
-            if (array_key_exists($key, $original) && $original[$key] !== $value) {
+            if (\array_key_exists($key, $original) && $original[$key] !== $value) {
                 $oldValues[$key] = $original[$key];
                 $newValues[$key] = $value;
             }
@@ -129,6 +130,7 @@ class AuditLogger
     /**
      * @param array<string, mixed> $attributes
      * @param list<string>|null $excludedAttributes
+     *
      * @return array<string, mixed>
      */
     protected static function filterAttributes(array $attributes, ?array $excludedAttributes = null): array

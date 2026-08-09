@@ -2,12 +2,12 @@
 
 declare(strict_types=1);
 
+use App\Livewire\AuditLogs\Index as AuditLogsIndex;
 use App\Livewire\Auth\LoginPage;
 use App\Livewire\CwtsStudents\Index as CwtsStudentsIndex;
-use App\Livewire\RotcStudents\Index as RotcStudentsIndex;
 use App\Livewire\Profile\Index as ProfileIndex;
+use App\Livewire\RotcStudents\Index as RotcStudentsIndex;
 use App\Livewire\Users\Index as UsersIndex;
-use App\Livewire\AuditLogs\Index as AuditLogsIndex;
 use App\Services\AuthService;
 use Illuminate\Support\Facades\Route;
 

@@ -11,6 +11,7 @@ use Illuminate\Database\Eloquent\Relations\MorphMany;
 trait Auditable
 {
     protected ?string $auditMessage = null;
+
     protected static bool $auditingEnabled = true;
 
     protected static function bootAuditable(): void

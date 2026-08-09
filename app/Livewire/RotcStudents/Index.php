@@ -9,7 +9,6 @@ use App\Enums\Gender;
 use App\Enums\NstpComponent;
 use App\Forms\RotcStudents\CreateForm;
 use App\Forms\RotcStudents\UpdateForm;
-use App\Models\AuditLog;
 use App\Models\CsvUpload;
 use App\Models\SchoolYear;
 use App\Models\Student;
@@ -147,7 +146,8 @@ class Index extends Component
                 $query->where(function (Builder $q) {
                     $q->where('last_name', 'ilike', '%' . $this->search . '%')
                         ->orWhere('first_name', 'ilike', '%' . $this->search . '%')
-                        ->orWhere('serial_number', 'ilike', '%' . $this->search . '%');
+                        ->orWhere('serial_number', 'ilike', '%' . $this->search . '%')
+                    ;
                 });
             })
             ->when($this->gender, fn (Builder $q) => $q->where('gender', $this->gender))
@@ -160,7 +160,8 @@ class Index extends Component
                 }
             })
             ->orderBy('last_name')
-            ->paginate(20);
+            ->paginate(20)
+        ;
     }
 
     /**
@@ -191,7 +192,8 @@ class Index extends Component
             ->where('nstp_component', NstpComponent::ROTC)
             ->latest()
             ->take(10)
-            ->get();
+            ->get()
+        ;
     }
 
     /**

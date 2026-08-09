@@ -231,7 +231,8 @@ class StudentCsvImportService
         return Student::whereIn('serial_number', $serials)
             ->pluck('serial_number')
             ->flip()
-            ->toArray();
+            ->toArray()
+        ;
     }
 
     /**

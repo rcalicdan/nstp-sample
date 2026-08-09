@@ -20,7 +20,7 @@ class LoginPage extends Component
 
     public function login(AuthService $authService)
     {
-        /** @var array<string, string>*/
+        /** @var array<string, string> */
         $validationPayload = [
             'email' => 'required|email',
             'password' => 'required',

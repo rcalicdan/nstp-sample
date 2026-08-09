@@ -13,10 +13,15 @@ use Livewire\Form;
 class CreateForm extends Form
 {
     public string $first_name = '';
+
     public string $last_name = '';
+
     public string $email = '';
+
     public string $password = '';
+
     public string $role = Role::STAFF->value;
+
     public bool $is_active = true;
 
     /**

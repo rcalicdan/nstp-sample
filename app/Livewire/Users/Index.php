@@ -25,6 +25,7 @@ class Index extends Component
     use WithToast;
 
     public CreateForm $createForm;
+
     public UpdateForm $updateForm;
 
     #[Url(except: '')]
@@ -121,12 +122,14 @@ class Index extends Component
                 $query->where(function (Builder $q) {
                     $q->where('first_name', 'ilike', '%' . $this->search . '%')
                         ->orWhere('last_name', 'ilike', '%' . $this->search . '%')
-                        ->orWhere('email', 'ilike', '%' . $this->search . '%');
+                        ->orWhere('email', 'ilike', '%' . $this->search . '%')
+                    ;
                 });
             })
-            ->when($this->selectedRole, fn(Builder $q) => $q->where('role', $this->selectedRole))
+            ->when($this->selectedRole, fn (Builder $q) => $q->where('role', $this->selectedRole))
             ->orderBy('last_name')
-            ->paginate(15);
+            ->paginate(15)
+        ;
     }
 
     public function render()
