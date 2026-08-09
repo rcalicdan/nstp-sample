@@ -6,6 +6,7 @@ namespace App\Livewire\Auth;
 
 use App\Services\AuthService;
 use App\Traits\WithToast;
+use Exception;
 use Livewire\Attributes\Layout;
 use Livewire\Component;
 
@@ -28,13 +29,20 @@ class LoginPage extends Component
 
         $this->validate($validationPayload);
 
-        if ($authService->login($this->email, $this->password)) {
-            session()->flash('success', 'You are successfully logged in.');
 
-            $this->redirectIntended(route('cwts-students.index'));
+        try {
+            if ($authService->login($this->email, $this->password)) {
+                session()->flash('success', 'You are successfully logged in.');
 
+                $this->redirectIntended(route('cwts-students.index'));
+
+                return;
+            }
+        } catch (Exception $e) {
+            $this->toast('error', $e->getMessage());
             return;
         }
+
 
         $this->toast('error', 'Invalid email address or password.');
         $this->reset('password');
