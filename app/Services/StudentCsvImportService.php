@@ -61,9 +61,15 @@ class StudentCsvImportService
         /** @var list<string> $errors */
         $errors = [];
 
+        /** @var array<string, bool> $seenEmails */
+        $seenEmails = [];
+
+        /** @var array<string, bool> $seenSerials */
+        $seenSerials = [];
+
         $filePath = $file->store('csv_uploads');
 
-        DB::transaction(function () use ($csvIterator, $headerMap, $component, $duplicateAction, $file, $filePath, $fileHash, $user, &$stats, &$errors) {
+        DB::transaction(function () use ($csvIterator, $headerMap, $component, $duplicateAction, $file, $filePath, $fileHash, $user, &$stats, &$errors, &$seenEmails, &$seenSerials) {
             $csvUpload = CsvUpload::create([
                 'user_id' => $user->id,
                 'school_year_id' => null,
@@ -97,13 +103,13 @@ class StudentCsvImportService
                 $chunk[] = $parsedRow;
 
                 if (\count($chunk) >= self::CHUNK_SIZE) {
-                    $this->processChunk($chunk, $duplicateAction, $stats);
+                    $this->processChunk($chunk, $duplicateAction, $stats, $seenEmails, $seenSerials);
                     $chunk = [];
                 }
             }
 
             if (! empty($chunk)) {
-                $this->processChunk($chunk, $duplicateAction, $stats);
+                $this->processChunk($chunk, $duplicateAction, $stats, $seenEmails, $seenSerials);
             }
 
             $csvUpload->update([
@@ -207,48 +213,119 @@ class StudentCsvImportService
     /**
      * @param list<ParsedStudentRow> $chunk
      * @param ImportStats $stats
+     * @param array<string, bool> $seenEmails
+     * @param array<string, bool> $seenSerials
      */
-    private function processChunk(array $chunk, string $duplicateAction, array &$stats): void
+    private function processChunk(array $chunk, string $duplicateAction, array &$stats, array &$seenEmails, array &$seenSerials): void
     {
         /** @var list<string> $serials */
-        $serials = array_column($chunk, 'serial_number');
+        $serials = array_values(array_column($chunk, 'serial_number'));
+
+        /** @var list<string> $emails */
+        $emails = array_values(array_filter(array_column($chunk, 'email')));
 
         $existingSerials = $this->getExistingSerials($serials);
+        $existingEmails = $this->getExistingEmails($emails);
 
-        [$toInsert, $toUpdate] = $this->categorizeRecords($chunk, $existingSerials, $duplicateAction, $stats);
+        $chunk = $this->sanitizeDuplicateEmails($chunk, $existingSerials, $existingEmails, $seenEmails);
+
+        [$toInsert, $toUpdate] = $this->categorizeRecords($chunk, $existingSerials, $duplicateAction, $stats, $seenSerials);
 
         $this->executeBulkOperations($toInsert, $toUpdate, $stats);
     }
 
     /**
+     * @param list<string> $emails
+     *
+     * @return array<string, string>
+     */
+    private function getExistingEmails(array $emails): array
+    {
+        if (empty($emails)) {
+            return [];
+        }
+
+        /** @var array<string, string> */
+        return Student::whereIn(DB::raw('UPPER(email)'), array_map('strtoupper', $emails))
+            ->pluck('serial_number', 'email')
+            ->mapWithKeys(fn ($serial, $email) => [strtolower($email) => $serial])
+            ->toArray();
+    }
+
+    /**
      * @param list<string> $serials
      *
-     * @return array<string, int>
+     * @return array<string, bool>
      */
     private function getExistingSerials(array $serials): array
     {
-        /** @var array<string, int> */
-        return Student::whereIn('serial_number', $serials)
+        if (empty($serials)) {
+            return [];
+        }
+
+        /** @var array<string, bool> */
+        return Student::whereIn(DB::raw('UPPER(serial_number)'), array_map('strtoupper', $serials))
             ->pluck('serial_number')
-            ->flip()
-            ->toArray()
-        ;
+            ->mapWithKeys(fn ($s) => [strtoupper($s) => true])
+            ->toArray();
     }
 
     /**
      * @param list<ParsedStudentRow> $chunk
-     * @param array<string, int> $existingSerials
+     * @param array<string, bool> $existingSerials
+     * @param array<string, string> $existingEmails
+     * @param array<string, bool> $seenEmails
+     *
+     * @return list<ParsedStudentRow>
+     */
+    private function sanitizeDuplicateEmails(array $chunk, array $existingSerials, array $existingEmails, array &$seenEmails): array
+    {
+        foreach ($chunk as $i => $row) {
+            $email = $row['email'];
+
+            if ($email === null) {
+                continue;
+            }
+
+            $emailLower = strtolower($email);
+
+            if (isset($seenEmails[$emailLower])) {
+                $chunk[$i]['email'] = null;
+                continue;
+            }
+
+            if (isset($existingEmails[$emailLower])) {
+                $ownerSerial = $existingEmails[$emailLower];
+
+                if (strtoupper($ownerSerial) !== strtoupper($row['serial_number'])) {
+                    $chunk[$i]['email'] = null;
+                    continue;
+                }
+            }
+
+            $seenEmails[$emailLower] = true;
+        }
+
+        return $chunk;
+    }
+
+    /**
+     * @param list<ParsedStudentRow> $chunk
+     * @param array<string, bool> $existingSerials
      * @param ImportStats $stats
+     * @param array<string, bool> $seenSerials
      *
      * @return array{0: list<ParsedStudentRow>, 1: list<ParsedStudentRow>}
      */
-    private function categorizeRecords(array $chunk, array $existingSerials, string $duplicateAction, array &$stats): array
+    private function categorizeRecords(array $chunk, array $existingSerials, string $duplicateAction, array &$stats, array &$seenSerials): array
     {
         $toInsert = [];
         $toUpdate = [];
 
         foreach ($chunk as $row) {
-            if (isset($existingSerials[$row['serial_number']])) {
+            $serialKey = strtoupper($row['serial_number']);
+
+            if (isset($seenSerials[$serialKey]) || isset($existingSerials[$serialKey])) {
                 if ($duplicateAction === 'update') {
                     $toUpdate[] = $row;
                 } else {
@@ -256,6 +333,7 @@ class StudentCsvImportService
                 }
             } else {
                 $toInsert[] = $row;
+                $seenSerials[$serialKey] = true;
             }
         }
 
