@@ -9,6 +9,7 @@ use App\Enums\Gender;
 use App\Enums\NstpComponent;
 use App\Forms\RotcStudents\CreateForm;
 use App\Forms\RotcStudents\UpdateForm;
+use App\Models\AuditLog;
 use App\Models\CsvUpload;
 use App\Models\SchoolYear;
 use App\Models\Student;
