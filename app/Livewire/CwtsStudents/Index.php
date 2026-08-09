@@ -149,7 +149,7 @@ class Index extends Component
                         ->orWhere('serial_number', 'ilike', '%' . $this->search . '%');
                 });
             })
-            ->when($this->gender, fn(Builder $q) => $q->where('gender', $this->gender))
+            ->when($this->gender, fn (Builder $q) => $q->where('gender', $this->gender))
             ->when($this->schoolYear, function (Builder $q) {
                 if (str_contains($this->schoolYear, '-')) {
                     [$start, $end] = explode('-', $this->schoolYear);
@@ -187,7 +187,7 @@ class Index extends Component
     public function recentUploads(): Collection
     {
         return CsvUpload::with(['user', 'schoolYear'])
-            ->where('nstp_component', NstpComponent::ROTC)
+            ->where('nstp_component', NstpComponent::CWTS)
             ->latest()
             ->take(10)
             ->get();

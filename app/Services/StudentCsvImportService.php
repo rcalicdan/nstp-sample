@@ -7,6 +7,7 @@ namespace App\Services;
 use App\Enums\Course;
 use App\Enums\Gender;
 use App\Enums\NstpComponent;
+use App\Models\AuditLog;
 use App\Models\CsvUpload;
 use App\Models\SchoolYear;
 use App\Models\Student;
@@ -110,6 +111,24 @@ class StudentCsvImportService
                 'imported_count' => $stats['imported'],
                 'updated_count' => $stats['updated'],
             ]);
+
+            AuditLog::create([
+                'auditable_type' => CsvUpload::class,
+                'auditable_id' => $csvUpload->id,
+                'event' => 'created',
+                'new_values' => [
+                    'file_name' => $file->getClientOriginalName(),
+                    'component' => $component->value,
+                    'imported' => $stats['imported'],
+                    'updated' => $stats['updated'],
+                    'skipped' => $stats['skipped'],
+                ],
+                'message' => "Bulk CSV Import: Imported {$stats['imported']} records, updated {$stats['updated']} records from '{$file->getClientOriginalName()}'",
+                'user_id' => $user->id,
+                'ip_address' => request()->ip(),
+                'user_agent' => request()->userAgent(),
+                'url' => request()->fullUrl(),
+            ]);
         });
 
         return [
@@ -123,11 +142,26 @@ class StudentCsvImportService
     public function rollback(CsvUpload $csvUpload): void
     {
         DB::transaction(function () use ($csvUpload) {
-            Student::where('csv_upload_id', $csvUpload->id)->delete();
+            $deletedCount = Student::where('csv_upload_id', $csvUpload->id)->delete();
 
             if (Storage::exists($csvUpload->file_path)) {
                 Storage::delete($csvUpload->file_path);
             }
+
+            AuditLog::create([
+                'auditable_type' => CsvUpload::class,
+                'auditable_id' => $csvUpload->id,
+                'event' => 'deleted',
+                'old_values' => [
+                    'file_name' => $csvUpload->file_name,
+                    'records_removed' => $deletedCount,
+                ],
+                'message' => "CSV Import Rollback: Permanently removed {$deletedCount} records imported from '{$csvUpload->file_name}'",
+                'user_id' => auth()->id(),
+                'ip_address' => request()->ip(),
+                'user_agent' => request()->userAgent(),
+                'url' => request()->fullUrl(),
+            ]);
 
             $csvUpload->delete();
         });
@@ -159,7 +193,7 @@ class StudentCsvImportService
 
         /** @var array<string, int> $headerMap */
         $headerMap = array_flip(array_map(
-            fn($h) => Str::of((string) $h)->replaceMatches('/[\x00-\x1F\x7F-\xFF]/', '')->trim()->toString(),
+            fn ($h) => Str::of((string) $h)->replaceMatches('/[\x00-\x1F\x7F-\xFF]/', '')->trim()->toString(),
             $header
         ));
 

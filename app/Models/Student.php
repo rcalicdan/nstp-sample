@@ -5,11 +5,14 @@ namespace App\Models;
 use App\Enums\Course;
 use App\Enums\Gender;
 use App\Enums\NstpComponent;
+use App\Traits\Auditable;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 class Student extends Model
 {
+    use Auditable;
+    
     /**
      * @var list<string>
      */

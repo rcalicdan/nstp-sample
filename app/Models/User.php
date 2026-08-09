@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use App\Enums\Role;
+use App\Traits\Auditable;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use Illuminate\Support\Str;
@@ -10,6 +11,7 @@ use Illuminate\Support\Str;
 class User extends Authenticatable
 {
     use Notifiable;
+    use Auditable;
 
     /**
      * @var list<string>

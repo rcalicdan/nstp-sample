@@ -20,10 +20,13 @@ class LoginPage extends Component
 
     public function login(AuthService $authService)
     {
-        $this->validate([
+        /** @var array<string, string>*/
+        $validationPayload = [
             'email' => 'required|email',
             'password' => 'required',
-        ]);
+        ];
+
+        $this->validate($validationPayload);
 
         if ($authService->login($this->email, $this->password)) {
             session()->flash('success', 'You are successfully logged in.');

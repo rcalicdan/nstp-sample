@@ -62,8 +62,8 @@
                 </x-utils.nav-link>
             @endcan
 
-            @if (auth()->user()->isSuperAdmin())
-                <x-utils.nav-link href="#" :active="request()->routeIs('audit-logs.*')" title="Audit Logs">
+            @can('viewAny', App\Models\AuditLog::class)
+                <x-utils.nav-link :href="route('audit-logs.index')" :active="request()->routeIs('audit-logs.*')" title="Audit Logs">
                     <x-slot:icon>
                         <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round"
@@ -71,7 +71,7 @@
                         </svg>
                     </x-slot:icon>
                 </x-utils.nav-link>
-            @endif
+            @endcan
         </nav>
     </div>
 

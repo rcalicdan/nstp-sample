@@ -186,7 +186,11 @@ class Index extends Component
     #[Computed]
     public function recentUploads(): Collection
     {
-        return CsvUpload::with(['user', 'schoolYear'])->latest()->take(10)->get();
+        return CsvUpload::with(['user', 'schoolYear'])
+            ->where('nstp_component', NstpComponent::ROTC)
+            ->latest()
+            ->take(10)
+            ->get();
     }
 
     /**
