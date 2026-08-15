@@ -33,6 +33,16 @@ return [
 
     /*
     |--------------------------------------------------------------------------
+    | Magic Annotations (@property & @method)
+    |--------------------------------------------------------------------------
+    | Enforces class-level annotations for dynamic properties and magic methods
+    | routed through __get, __set, __call, and __callStatic.
+    */
+    'magic_properties' => true,
+    'magic_methods' => true,
+
+    /*
+    |--------------------------------------------------------------------------
     | Respect Ignore Docblock Tags
     |--------------------------------------------------------------------------
     | When true (default), @typephp-ignore and @typephp-ignore-file docblock tags
@@ -44,12 +54,18 @@ return [
 
     /*
     |--------------------------------------------------------------------------
-    | Enable Caching
+    | Enable Caching & Cache Directory
     |--------------------------------------------------------------------------
     | When enabled, transformed PHP files are cached on disk for speed.
     | Set to false to run AST transformations purely in RAM (php://memory).
+    |
+    | 'cache_dir' determines where these files are stored. By default (null), 
+    | it uses your system's temp directory. You can change this to a path
+    | inside your project, e.g., __DIR__ . '/storage/framework/typephp'.
+    | TypePHP will automatically protect this directory from being re-transformed.
     */
     'cache' => true,
+    'cache_dir' => null,
 
     /*
     |--------------------------------------------------------------------------
@@ -78,11 +94,11 @@ return [
     */
     'inline_vars' => [
         'properties' => true,
-        'generics' => true,
-        'callables' => true,
-        'scalars' => true,
-        'arrays' => true,
-        'objects' => true,
+        'generics'   => true,
+        'callables'  => true,
+        'scalars'    => true,
+        'arrays'     => true,
+        'objects'    => true,
     ],
 
     /*
@@ -98,8 +114,10 @@ return [
     | (e.g. 'vendor/monolog/monolog/src/Monolog/Logger.php').
     */
     'include' => [
+        'src/**',
         'app/**',
         'tests/**',
+        // 'vendor/my-org/my-package/**', // Whitelist a vendor package
     ],
 
     /*
