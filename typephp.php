@@ -114,10 +114,8 @@ return [
     | (e.g. 'vendor/monolog/monolog/src/Monolog/Logger.php').
     */
     'include' => [
-        'src/**',
         'app/**',
         'tests/**',
-        // 'vendor/my-org/my-package/**', // Whitelist a vendor package
     ],
 
     /*
