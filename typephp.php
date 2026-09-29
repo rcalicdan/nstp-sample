@@ -22,14 +22,42 @@ return [
 
     /*
     |--------------------------------------------------------------------------
-    | Function Boundary Contracts (@param & @return)
+    | Function Boundary Contracts (@param, @return, @param-out, @self-out)
     |--------------------------------------------------------------------------
-    | Controls whether function and method parameter/return contracts are enforced.
+    | Controls whether function and method parameter, return, and by-reference
+    | out-parameter contracts are enforced at runtime.
     | When enabled, all parameter and return types (generics, shapes, scalars)
     | are enforced uniformly to maintain type state consistency.
     */
-    'params' => true,
-    'returns' => true,
+    'params'     => true,
+    'returns'    => true,
+    'params_out' => true,
+    'self_out'   => true,
+
+    /*
+    |--------------------------------------------------------------------------
+    | Strict Generic Return Invariance (PHPStan / Psalm Parity)
+    |--------------------------------------------------------------------------
+    | When true (default / strict), generic return types enforce invariance
+    | matching PHPStan Level MAX. Returning Collection<Dog> when Collection<Animal>
+    | is promised will be rejected unless the class declares '@template-covariant'
+    | or the return type specifies use-site covariance '<covariant Animal>'.
+    |
+    | Set to false (pragmatic mode) when integrating with frameworks like Shopware,
+    | Laravel, or legacy codebases where collection classes omit '@template-covariant'.
+    */
+    'strict_return_generic_invariance' => true,
+
+    /*
+    |--------------------------------------------------------------------------
+    | Vendor Boundary Only Enforcement
+    |--------------------------------------------------------------------------
+    | When true (default), whitelisted vendor packages (e.g. Illuminate\Collections)
+    | only enforce type contracts on calls originating from application code (included paths).
+    | Internal vendor-to-vendor or vendor-self calls bypass strict enforcement.
+    | Set to false for strict pedantic enforcement across all vendor internals.
+    */
+    'vendor_boundary_only' => true,
 
     /*
     |--------------------------------------------------------------------------
@@ -37,8 +65,21 @@ return [
     |--------------------------------------------------------------------------
     | Enforces class-level annotations for dynamic properties and magic methods
     | routed through __get, __set, __call, and __callStatic.
+    |
+    | 'magic_properties' supports granular options:
+    | - 'write': (Default: true) Validates dynamic property assignments via __set()
+    |            against @property and @property-write annotations.
+    | - 'read' : (Default: false) Validates dynamic property access via __get()
+    |            against @property and @property-read annotations. Keep false
+    |            when working with frameworks (e.g. Eloquent/Doctrine) where
+    |            newly instantiated models return unpopulated null attributes.
+    |
+    | Alternatively, set 'magic_properties' => false to disable all checks.
     */
-    'magic_properties' => true,
+    'magic_properties' => [
+        'write' => true,
+        'read'  => false,
+    ],
     'magic_methods' => true,
 
     /*
@@ -51,6 +92,45 @@ return [
     | the docblock tags from source code.
     */
     'respect_ignore_tags' => true,
+
+    /*
+    |--------------------------------------------------------------------------
+    | Ignore Tag Stack Trace Depth
+    |--------------------------------------------------------------------------
+    | Controls how many stack frames above a failing type check TypePHP will
+    | inspect to find an enclosing @typephp-ignore or @typephp-disable tag.
+    | Default is 25 frames. Increase this if your application or test suite
+    | uses deep call stacks (e.g. pipelines, middlewares, or nested callers).
+    */
+    'ignore_trace_depth' => 25,
+
+    /*
+    |--------------------------------------------------------------------------
+    | Array Validation Strategy
+    |--------------------------------------------------------------------------
+    | Controls how collections (list<T>, array<K, V>, Type[]) are verified:
+    |
+    | - 'full'   : (Default / Strict) 100% exhaustive scan. Checks every single 
+    |             item in every array, guaranteeing every single offending item
+    |             is caught without exception.
+    |
+    | - 'hybrid' : (Beartype O(1) Mode) Fast boundary + random sampling on
+    |             arrays > 128 items. Ideal for massive production datasets.
+    */
+    'array_validation' => 'full',
+
+    /*
+    |--------------------------------------------------------------------------
+    | Respect Native Parameter Nullability
+    |--------------------------------------------------------------------------
+    | When true (default), if a native PHP parameter explicitly declares
+    | nullable syntax (e.g. ?array $param = null), TypePHP permits null even
+    | if the DocBlock author omitted "|null" (e.g. @param string[] $param).
+    |
+    | Set to false for strict pedantic enforcement where DocBlocks are the
+    | absolute law and null is rejected unless explicitly typed in the DocBlock.
+    */
+    'respect_native_nullability' => true,
 
     /*
     |--------------------------------------------------------------------------
@@ -69,12 +149,36 @@ return [
 
     /*
     |--------------------------------------------------------------------------
+    | Cache File Modification Monitor
+    |--------------------------------------------------------------------------
+    | When enabled (default), TypePHP checks file modification times (filemtime)
+    | to automatically rebuild the cache when a file changes.
+    | 
+    | In production, files do not change. Set this to FALSE to eliminate 
+    | hundreds of disk I/O checks per request for maximum performance.
+    | Note: If disabled, you must run `php bin/typephp cache:clear` on deployment.
+    */
+    'cache_check_mtime' => true,
+
+    /*
+    |--------------------------------------------------------------------------
     | Registered Extensions
     |--------------------------------------------------------------------------
     | Explicitly list third-party extension classes that provide path overrides.
     */
     'extensions' => [
         // \Acme\Domain\TypePHPExtension::class,
+    ],
+
+    /*
+    |--------------------------------------------------------------------------
+    | Stub Files (DocBlock Overrides for Third-Party & Vendor Packages)
+    |--------------------------------------------------------------------------
+    | Path globs or specific file paths containing stub files (.stub, .stub.php, .php)
+    | that override inaccurate or missing DocBlocks in third-party vendor packages.
+    */
+    'stubs' => [
+        // 'stubs/**',
     ],
 
     /*
@@ -131,6 +235,5 @@ return [
         'storage/**',
         'var/**',
         'cache/**',
-        // 'src/Legacy/UnsafeFile.php', // Blacklist a single specific file
     ],
 ];
