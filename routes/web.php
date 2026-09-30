@@ -2,6 +2,9 @@
 
 declare(strict_types=1);
 
+use App\Http\Controllers\Admin\PostMediaController;
+use App\Livewire\Admin\Posts\Editor as PostEditor;
+use App\Livewire\Admin\Posts\Index as PostsIndex;
 use App\Livewire\AuditLogs\Index as AuditLogsIndex;
 use App\Livewire\Auth\LoginPage;
 use App\Livewire\CwtsStudents\Index as CwtsStudentsIndex;
@@ -32,4 +35,12 @@ Route::middleware('auth')->group(function () {
 
         return redirect()->route('login');
     })->name('logout');
+
+    Route::post('/admin/posts/media/upload', [PostMediaController::class, 'upload'])
+        ->name('admin.posts.media.upload')
+    ;
+
+    Route::get('/admin/posts', PostsIndex::class)->name('admin.posts.index');
+    Route::get('/admin/posts/create', PostEditor::class)->name('admin.posts.create');
+    Route::get('/admin/posts/{post}/edit', PostEditor::class)->name('admin.posts.edit');
 });

@@ -14,7 +14,7 @@ class PostPolicy
         return $user->isSuperAdmin() || $user->isAdmin() || $user->isEditor() || $user->isStaff();
     }
 
-    public function view(User $user, Post $post): bool
+    public function view(User $user, ?Post $post = null): bool
     {
         return $user->isSuperAdmin() || $user->isAdmin() || $user->isEditor() || $user->isStaff();
     }
@@ -24,29 +24,25 @@ class PostPolicy
         return $user->isSuperAdmin() || $user->isAdmin() || $user->isEditor();
     }
 
-    public function update(User $user, Post $post): bool
+    public function update(User $user, ?Post $post = null): bool
     {
         if ($user->isSuperAdmin() || $user->isAdmin()) {
             return true;
         }
 
-        return $user->isEditor() && $user->id === $post->user_id;
+        return $post ? ($user->isEditor() && $user->id === $post->user_id) : $user->isEditor();
     }
 
-    public function delete(User $user, Post $post): bool
+    public function delete(User $user, ?Post $post = null): bool
     {
-        if ($user->isSuperAdmin()) {
+        if ($user->isSuperAdmin() || $user->isAdmin()) {
             return true;
         }
 
-        if ($user->isAdmin()) {
-            return true;
-        }
-
-        return $user->isEditor() && $user->id === $post->user_id;
+        return $post ? ($user->isEditor() && $user->id === $post->user_id) : $user->isEditor();
     }
 
-    public function publish(User $user, Post $post): bool
+    public function publish(User $user, ?Post $post = null): bool
     {
         return $user->isSuperAdmin() || $user->isAdmin() || $user->isEditor();
     }

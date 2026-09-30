@@ -80,7 +80,8 @@ class Post extends Model
     {
         $query->where('is_published', true)
             ->whereNotNull('published_at')
-            ->where('published_at', '<=', now());
+            ->where('published_at', '<=', now())
+        ;
     }
 
     /**
