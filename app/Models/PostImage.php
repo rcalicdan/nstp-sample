@@ -18,6 +18,9 @@ class PostImage extends Model
         'original_name',
         'file_size',
         'mime_type',
+        'width',
+        'alignment',
+        'caption',
         'temp_token',
     ];
 

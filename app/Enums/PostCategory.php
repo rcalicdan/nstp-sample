@@ -16,6 +16,16 @@ enum PostCategory: string
         return $this->value;
     }
 
+    public function badgeClasses(): string
+    {
+        return match ($this) {
+            self::NEWS => 'bg-blue-50 text-blue-700 border-blue-200',
+            self::ANNOUNCEMENT => 'bg-amber-50 text-amber-700 border-amber-200',
+            self::EVENT => 'bg-purple-50 text-purple-700 border-purple-200',
+            self::ADVISORY => 'bg-red-50 text-red-700 border-red-200',
+        };
+    }
+
     /**
      * @return array<string, string>
      */

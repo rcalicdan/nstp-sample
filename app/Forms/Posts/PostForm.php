@@ -7,6 +7,7 @@ namespace App\Forms\Posts;
 use App\Enums\PostCategory;
 use App\Models\Post;
 use App\Models\PostImage;
+use Dom\HTMLDocument;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
@@ -29,25 +30,17 @@ class PostForm extends Form
 
     public string $content = '';
 
-    /**
-     * Publication mode: 'now', 'schedule', or 'draft'.
-     */
     public string $publish_mode = 'now';
 
     public ?string $scheduled_at = null;
 
     public bool $is_pinned = false;
 
-    /**
-     * @var \Illuminate\Http\UploadedFile|string|null
-     */
+    /** @var \Illuminate\Http\UploadedFile|string|null */
     public $featuredImage = null;
 
     public ?string $existingFeaturedImage = null;
 
-    /**
-     * @return array<string, mixed>
-     */
     public function rules(): array
     {
         return [
@@ -59,7 +52,7 @@ class PostForm extends Form
             'publish_mode' => ['required', 'in:now,schedule,draft'],
             'scheduled_at' => [
                 'nullable',
-                Rule::requiredIf(fn () => $this->publish_mode === 'schedule'),
+                Rule::requiredIf(fn() => $this->publish_mode === 'schedule'),
                 'date',
             ],
             'is_pinned' => ['required', 'boolean'],
@@ -124,10 +117,7 @@ class PostForm extends Form
             'published_at' => $publishedAt,
         ]);
 
-        PostImage::where('temp_token', $this->tempToken)->update([
-            'post_id' => $post->id,
-            'temp_token' => null,
-        ]);
+        $this->syncInlineImages($post);
 
         return $post;
     }
@@ -158,10 +148,7 @@ class PostForm extends Form
             'published_at' => $publishedAt,
         ]);
 
-        PostImage::where('temp_token', $this->tempToken)->update([
-            'post_id' => $this->post->id,
-            'temp_token' => null,
-        ]);
+        $this->syncInlineImages($this->post);
 
         return $this->post;
     }
@@ -177,9 +164,69 @@ class PostForm extends Form
         $this->existingFeaturedImage = null;
     }
 
-    /**
-     * @return array{0: bool, 1: ?Carbon}
-     */
+    private function syncInlineImages(Post $post): void
+    {
+        if (empty($this->content)) {
+            return;
+        }
+
+        $document = HTMLDocument::createFromString($this->content, LIBXML_NOERROR);
+        $imgNodes = $document->querySelectorAll('img');
+
+        $activePaths = [];
+
+        foreach ($imgNodes as $img) {
+            $src = $img->getAttribute('src') ?? '';
+
+            if (! str_contains($src, '/storage/')) {
+                continue;
+            }
+
+            $relativePath = ltrim(parse_url($src, PHP_URL_PATH) ?? '', '/');
+            $storagePrefix = 'storage/';
+            if (str_starts_with($relativePath, $storagePrefix)) {
+                $relativePath = substr($relativePath, strlen($storagePrefix));
+            }
+
+            $activePaths[] = $relativePath;
+
+            $width = $img->getAttribute('data-width') ?: '100%';
+            $alignment = $img->getAttribute('data-alignment') ?: 'center';
+            $caption = $img->getAttribute('data-caption');
+
+            if (empty($caption) && strtolower($img->parentElement?->tagName ?? '') === 'figure') {
+                $figcaption = $img->parentElement->querySelector('figcaption');
+                if ($figcaption) {
+                    $caption = trim($figcaption->textContent);
+                }
+            }
+
+            PostImage::where('file_path', $relativePath)
+                ->where(function ($q) use ($post) {
+                    $q->where('post_id', $post->id)
+                        ->orWhere('temp_token', $this->tempToken);
+                })
+                ->update([
+                    'post_id' => $post->id,
+                    'temp_token' => null,
+                    'width' => $width,
+                    'alignment' => $alignment,
+                    'caption' => ! empty($caption) ? $caption : null,
+                ]);
+        }
+
+        $orphanedImages = PostImage::where(function ($q) use ($post) {
+            $q->where('post_id', $post->id)
+                ->orWhere('temp_token', $this->tempToken);
+        })
+            ->whereNotIn('file_path', $activePaths)
+            ->get();
+
+        foreach ($orphanedImages as $orphan) {
+            $orphan->delete();
+        }
+    }
+
     private function resolvePublicationTimings(): array
     {
         return match ($this->publish_mode) {
