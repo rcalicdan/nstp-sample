@@ -16,10 +16,18 @@ use App\Livewire\Profile\Index as ProfileIndex;
 use App\Livewire\RotcStudents\Index as RotcStudentsIndex;
 use App\Livewire\Users\Index as UsersIndex;
 use App\Services\AuthService;
+use App\Livewire\News\Index as NewsIndex;
+use App\Livewire\Pages\About as AboutPage;
+use App\Livewire\Pages\Services as ServicesPage;
+use App\Livewire\Pages\Terms as TermsPage;
 use Illuminate\Support\Facades\Route;
 
 Route::get('/', Home::class)->name('home');
+Route::get('/news', NewsIndex::class)->name('news.index');
 Route::get('/news/{slug}', NewsShow::class)->name('news.show');
+Route::get('/about', AboutPage::class)->name('about');
+Route::get('/services', ServicesPage::class)->name('services');
+Route::get('/terms', TermsPage::class)->name('terms');
 
 Route::middleware('guest')->group(function () {
     Route::get('/login', LoginPage::class)->name('login');

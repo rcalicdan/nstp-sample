@@ -8,14 +8,30 @@
     class="fixed inset-y-0 left-0 top-[5px] z-40 bg-[#2d0012] header-pattern text-white transition-all duration-300 ease-in-out md:translate-x-0 flex flex-col justify-between border-r border-[#4a001c] shadow-2xl overflow-hidden">
     <div>
         <div class="px-4 py-4 border-b border-[#4a001c] flex items-center justify-between">
-            <div class="flex items-center gap-3 overflow-hidden">
-                <img src="{{ asset('images/logo.png') }}" alt="Logo" class="w-10 h-10 flex-shrink-0 drop-shadow" />
-                <div x-show="!sidebarCollapsed" class="transition-opacity duration-200">
-                    <h2 class="text-white font-display text-lg tracking-wide leading-tight whitespace-nowrap">EVSU NSTP
-                    </h2>
-                    <p class="text-[#f9c22e] text-[10px] font-display tracking-widest uppercase whitespace-nowrap">
-                        Management System</p>
-                </div>
+            <div :class="sidebarCollapsed ? 'justify-center px-0' : 'justify-between px-4'"
+                class="py-4 border-b border-[#4a001c] flex items-center transition-all duration-300">
+                <a href="{{ route('home') }}" :class="sidebarCollapsed ? 'justify-center w-full' : 'gap-3'"
+                    class="flex items-center overflow-hidden group transition" title="Go to Public Homepage">
+                    <img src="{{ asset('images/logo.png') }}" alt="Logo"
+                        class="w-10 h-10 flex-shrink-0 drop-shadow group-hover:scale-105 transition-transform duration-200" />
+
+                    <div x-show="!sidebarCollapsed" class="transition-opacity duration-200">
+                        <h2
+                            class="text-white font-display text-lg tracking-wide leading-tight whitespace-nowrap group-hover:text-[#f9c22e] transition-colors">
+                            EVSU NSTP
+                        </h2>
+                        <p class="text-[#f9c22e] text-[10px] font-display tracking-widest uppercase whitespace-nowrap">
+                            Management System
+                        </p>
+                    </div>
+                </a>
+
+                <button x-show="!sidebarCollapsed" @click="sidebarOpen = false" type="button"
+                    class="md:hidden text-white/50 hover:text-white flex-shrink-0">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
+                    </svg>
+                </button>
             </div>
             <button @click="sidebarOpen = false" type="button" class="md:hidden text-white/50 hover:text-white">
                 <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
