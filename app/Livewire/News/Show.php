@@ -38,7 +38,8 @@ class Show extends Component
             ->where('id', '!=', $this->post->id)
             ->pinnedFirst()
             ->take(4)
-            ->get();
+            ->get()
+        ;
     }
 
     public function render()

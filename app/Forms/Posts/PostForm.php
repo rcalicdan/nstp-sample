@@ -36,7 +36,9 @@ class PostForm extends Form
 
     public bool $is_pinned = false;
 
-    /** @var \Illuminate\Http\UploadedFile|string|null */
+    /**
+     * @var \Illuminate\Http\UploadedFile|string|null
+     */
     public $featuredImage = null;
 
     public ?string $existingFeaturedImage = null;
@@ -52,7 +54,7 @@ class PostForm extends Form
             'publish_mode' => ['required', 'in:now,schedule,draft'],
             'scheduled_at' => [
                 'nullable',
-                Rule::requiredIf(fn() => $this->publish_mode === 'schedule'),
+                Rule::requiredIf(fn () => $this->publish_mode === 'schedule'),
                 'date',
             ],
             'is_pinned' => ['required', 'boolean'],
@@ -185,7 +187,7 @@ class PostForm extends Form
             $relativePath = ltrim(parse_url($src, PHP_URL_PATH) ?? '', '/');
             $storagePrefix = 'storage/';
             if (str_starts_with($relativePath, $storagePrefix)) {
-                $relativePath = substr($relativePath, strlen($storagePrefix));
+                $relativePath = substr($relativePath, \strlen($storagePrefix));
             }
 
             $activePaths[] = $relativePath;
@@ -204,7 +206,8 @@ class PostForm extends Form
             PostImage::where('file_path', $relativePath)
                 ->where(function ($q) use ($post) {
                     $q->where('post_id', $post->id)
-                        ->orWhere('temp_token', $this->tempToken);
+                        ->orWhere('temp_token', $this->tempToken)
+                    ;
                 })
                 ->update([
                     'post_id' => $post->id,
@@ -212,15 +215,18 @@ class PostForm extends Form
                     'width' => $width,
                     'alignment' => $alignment,
                     'caption' => ! empty($caption) ? $caption : null,
-                ]);
+                ])
+            ;
         }
 
         $orphanedImages = PostImage::where(function ($q) use ($post) {
             $q->where('post_id', $post->id)
-                ->orWhere('temp_token', $this->tempToken);
+                ->orWhere('temp_token', $this->tempToken)
+            ;
         })
             ->whereNotIn('file_path', $activePaths)
-            ->get();
+            ->get()
+        ;
 
         foreach ($orphanedImages as $orphan) {
             $orphan->delete();
