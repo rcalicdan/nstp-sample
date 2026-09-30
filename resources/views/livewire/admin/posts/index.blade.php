@@ -148,6 +148,10 @@
 
                             <x-table.td align="center">
                                 <div class="flex items-center justify-center gap-1.5">
+                                    <a href="{{ route('news.show', $post->slug) }}" target="_blank">
+                                        <x-utils.view-button title="View Article Page" />
+                                    </a>
+
                                     @can('update', $post)
                                         <a href="{{ route('admin.posts.edit', $post) }}" wire:navigate>
                                             <x-utils.edit-button title="Edit Article" />

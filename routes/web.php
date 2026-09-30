@@ -13,8 +13,11 @@ use App\Livewire\LtsStudents\Index as LtsStudentsIndex;
 use App\Livewire\Profile\Index as ProfileIndex;
 use App\Livewire\RotcStudents\Index as RotcStudentsIndex;
 use App\Livewire\Users\Index as UsersIndex;
+use App\Livewire\News\Show as NewsShow;
 use App\Services\AuthService;
 use Illuminate\Support\Facades\Route;
+
+Route::get('/news/{slug}', NewsShow::class)->name('news.show');
 
 Route::middleware('guest')->group(function () {
     Route::get('/', LoginPage::class)->name('login');

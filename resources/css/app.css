@@ -131,3 +131,35 @@
     margin-top: 0.5rem;
     font-style: italic;
 }
+
+figure.tiptap-figure {
+    margin-top: 1.5rem;
+    margin-bottom: 1.5rem;
+    display: block;
+}
+
+figure.tiptap-figure img {
+    border-radius: 0.75rem;
+    height: auto;
+    display: block;
+}
+
+figure.tiptap-figure figcaption,
+figcaption.image-caption {
+    font-family: 'Source Sans 3', sans-serif;
+    font-size: 0.8125rem;
+    color: #6b7280;
+    text-align: center;
+    margin-top: 0.5rem;
+    font-style: italic;
+    line-height: 1.4;
+}
+
+figure.tiptap-figure[data-width="25%"] { width: 25% !important; }
+figure.tiptap-figure[data-width="50%"] { width: 50% !important; }
+figure.tiptap-figure[data-width="75%"] { width: 75% !important; }
+figure.tiptap-figure[data-width="100%"] { width: 100% !important; }
+
+figure.tiptap-figure[data-alignment="center"] { margin-left: auto !important; margin-right: auto !important; }
+figure.tiptap-figure[data-alignment="left"] { margin-left: 0 !important; margin-right: auto !important; }
+figure.tiptap-figure[data-alignment="right"] { margin-left: auto !important; margin-right: 0 !important; }
