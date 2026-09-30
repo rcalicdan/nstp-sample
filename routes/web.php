@@ -5,6 +5,7 @@ declare(strict_types=1);
 use App\Livewire\AuditLogs\Index as AuditLogsIndex;
 use App\Livewire\Auth\LoginPage;
 use App\Livewire\CwtsStudents\Index as CwtsStudentsIndex;
+use App\Livewire\Dashboard\Index as DashboardIndex;
 use App\Livewire\LtsStudents\Index as LtsStudentsIndex;
 use App\Livewire\Profile\Index as ProfileIndex;
 use App\Livewire\RotcStudents\Index as RotcStudentsIndex;
@@ -18,10 +19,7 @@ Route::middleware('guest')->group(function () {
 });
 
 Route::middleware('auth')->group(function () {
-    Route::get('/dashboard', function () {
-        return redirect()->route('cwts-students.index');
-    })->name('dashboard');
-
+    Route::get('/dashboard', DashboardIndex::class)->name('dashboard');
     Route::get('/cwts-students', CwtsStudentsIndex::class)->name('cwts-students.index');
     Route::get('/rotc-students', RotcStudentsIndex::class)->name('rotc-students.index');
     Route::get('/lts-students', LtsStudentsIndex::class)->name('lts-students.index');

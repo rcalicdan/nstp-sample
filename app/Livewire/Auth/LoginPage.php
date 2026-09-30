@@ -33,7 +33,7 @@ class LoginPage extends Component
             if ($authService->login($this->email, $this->password)) {
                 session()->flash('success', 'You are successfully logged in.');
 
-                $this->redirectIntended(route('cwts-students.index'));
+                $this->redirectIntended(route('dashboard'));
 
                 return;
             }
