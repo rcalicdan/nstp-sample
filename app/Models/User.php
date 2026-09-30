@@ -6,6 +6,7 @@ namespace App\Models;
 
 use App\Enums\Role;
 use App\Traits\Auditable;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use Illuminate\Support\Str;
@@ -70,7 +71,7 @@ class User extends Authenticatable
         }
 
         if ($this->isAdmin()) {
-            return [Role::STAFF];
+            return [Role::EDITOR, Role::STAFF];
         }
 
         return [];
@@ -84,6 +85,11 @@ class User extends Authenticatable
     public function isAdmin(): bool
     {
         return $this->role === Role::ADMIN;
+    }
+
+    public function isEditor(): bool
+    {
+        return $this->role === Role::EDITOR;
     }
 
     public function isStaff(): bool
@@ -109,5 +115,13 @@ class User extends Authenticatable
     public function canDelete(): bool
     {
         return $this->isSuperAdmin();
+    }
+
+    /**
+     * @return HasMany<Post, $this>
+     */
+    public function posts(): HasMany
+    {
+        return $this->hasMany(Post::class);
     }
 }

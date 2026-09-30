@@ -29,7 +29,7 @@ class UserPolicy
         }
 
         if ($user->isAdmin()) {
-            return $targetUser->isStaff();
+            return $targetUser->isStaff() || $targetUser->isEditor();
         }
 
         return false;
@@ -46,7 +46,7 @@ class UserPolicy
         }
 
         if ($user->isAdmin()) {
-            return $targetUser->isStaff();
+            return $targetUser->isStaff() || $targetUser->isEditor();
         }
 
         return false;
@@ -63,7 +63,7 @@ class UserPolicy
         }
 
         if ($user->isAdmin()) {
-            return $targetUser->isStaff();
+            return $targetUser->isStaff() || $targetUser->isEditor();
         }
 
         return false;
