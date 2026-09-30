@@ -2115,16 +2115,16 @@
         },
         {
             "name": "monolog/monolog",
-            "version": "3.12.0",
+            "version": "3.12.1",
             "source": {
                 "type": "git",
                 "url": "https://github.com/Seldaek/monolog.git",
-                "reference": "72c534fc0ab181ef52d92a68382318631e301608"
+                "reference": "d7059e4c691d05ea1222b5124bed0f961be46e15"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/Seldaek/monolog/zipball/72c534fc0ab181ef52d92a68382318631e301608",
-                "reference": "72c534fc0ab181ef52d92a68382318631e301608",
+                "url": "https://api.github.com/repos/Seldaek/monolog/zipball/d7059e4c691d05ea1222b5124bed0f961be46e15",
+                "reference": "d7059e4c691d05ea1222b5124bed0f961be46e15",
                 "shasum": ""
             },
             "require": {
@@ -2204,7 +2204,7 @@
             ],
             "support": {
                 "issues": "https://github.com/Seldaek/monolog/issues",
-                "source": "https://github.com/Seldaek/monolog/tree/3.12.0"
+                "source": "https://github.com/Seldaek/monolog/tree/3.12.1"
             },
             "funding": [
                 {
@@ -2216,7 +2216,7 @@
                     "type": "tidelift"
                 }
             ],
-            "time": "2026-09-09T08:34:20+00:00"
+            "time": "2026-09-29T19:21:12+00:00"
         },
         {
             "name": "nesbot/carbon",
@@ -6326,16 +6326,16 @@
         },
         {
             "name": "fidry/cpu-core-counter",
-            "version": "1.4.0",
+            "version": "1.4.1",
             "source": {
                 "type": "git",
                 "url": "https://github.com/theofidry/cpu-core-counter.git",
-                "reference": "7cbeb03e286fa81b2bbe0e6bd6b8a27c71a3144d"
+                "reference": "d384a7d0d6e67aa497327260ca95023e92dc2032"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/theofidry/cpu-core-counter/zipball/7cbeb03e286fa81b2bbe0e6bd6b8a27c71a3144d",
-                "reference": "7cbeb03e286fa81b2bbe0e6bd6b8a27c71a3144d",
+                "url": "https://api.github.com/repos/theofidry/cpu-core-counter/zipball/d384a7d0d6e67aa497327260ca95023e92dc2032",
+                "reference": "d384a7d0d6e67aa497327260ca95023e92dc2032",
                 "shasum": ""
             },
             "require": {
@@ -6376,7 +6376,7 @@
             ],
             "support": {
                 "issues": "https://github.com/theofidry/cpu-core-counter/issues",
-                "source": "https://github.com/theofidry/cpu-core-counter/tree/1.4.0"
+                "source": "https://github.com/theofidry/cpu-core-counter/tree/1.4.1"
             },
             "funding": [
                 {
@@ -6384,7 +6384,7 @@
                     "type": "github"
                 }
             ],
-            "time": "2026-09-27T17:40:20+00:00"
+            "time": "2026-09-29T22:11:39+00:00"
         },
         {
             "name": "filp/whoops",
@@ -9599,16 +9599,16 @@
         },
         {
             "name": "typephp/typephp",
-            "version": "v0.10.14",
+            "version": "v0.10.18",
             "source": {
                 "type": "git",
                 "url": "https://github.com/typephp-php/typephp.git",
-                "reference": "0b2405fcd0c2b007d92d0f4d0e388abc8fa4e1ed"
+                "reference": "f46c6b83d12649540af1c3ab611cd6df41108422"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/typephp-php/typephp/zipball/0b2405fcd0c2b007d92d0f4d0e388abc8fa4e1ed",
-                "reference": "0b2405fcd0c2b007d92d0f4d0e388abc8fa4e1ed",
+                "url": "https://api.github.com/repos/typephp-php/typephp/zipball/f46c6b83d12649540af1c3ab611cd6df41108422",
+                "reference": "f46c6b83d12649540af1c3ab611cd6df41108422",
                 "shasum": ""
             },
             "require": {
@@ -9667,7 +9667,7 @@
             ],
             "support": {
                 "issues": "https://github.com/typephp-php/typephp/issues",
-                "source": "https://github.com/typephp-php/typephp/tree/v0.10.14"
+                "source": "https://github.com/typephp-php/typephp/tree/v0.10.18"
             },
             "funding": [
                 {
@@ -9675,7 +9675,7 @@
                     "type": "github"
                 }
             ],
-            "time": "2026-09-28T17:12:14+00:00"
+            "time": "2026-09-30T07:44:24+00:00"
         },
         {
             "name": "webmozart/assert",

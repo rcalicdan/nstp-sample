@@ -249,7 +249,8 @@ class StudentCsvImportService
         return Student::whereIn(DB::raw('UPPER(email)'), array_map('strtoupper', $emails))
             ->pluck('serial_number', 'email')
             ->mapWithKeys(fn ($serial, $email) => [strtolower($email) => $serial])
-            ->toArray();
+            ->toArray()
+        ;
     }
 
     /**
@@ -267,7 +268,8 @@ class StudentCsvImportService
         return Student::whereIn(DB::raw('UPPER(serial_number)'), array_map('strtoupper', $serials))
             ->pluck('serial_number')
             ->mapWithKeys(fn ($s) => [strtoupper($s) => true])
-            ->toArray();
+            ->toArray()
+        ;
     }
 
     /**
@@ -291,6 +293,7 @@ class StudentCsvImportService
 
             if (isset($seenEmails[$emailLower])) {
                 $chunk[$i]['email'] = null;
+
                 continue;
             }
 
@@ -299,6 +302,7 @@ class StudentCsvImportService
 
                 if (strtoupper($ownerSerial) !== strtoupper($row['serial_number'])) {
                     $chunk[$i]['email'] = null;
+
                     continue;
                 }
             }

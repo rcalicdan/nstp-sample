@@ -13,14 +13,12 @@ class AuthService
         if (Auth::attempt(['email' => $email, 'password' => $password])) {
             session()->regenerate();
 
-            if(!Auth::user()->is_active) {
+            if (! Auth::user()->is_active) {
                 throw new \Exception('User account is not active.');
             }
 
             return true;
         }
-
-      
 
         return false;
     }

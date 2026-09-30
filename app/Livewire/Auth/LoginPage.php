@@ -29,7 +29,6 @@ class LoginPage extends Component
 
         $this->validate($validationPayload);
 
-
         try {
             if ($authService->login($this->email, $this->password)) {
                 session()->flash('success', 'You are successfully logged in.');
@@ -40,9 +39,9 @@ class LoginPage extends Component
             }
         } catch (Exception $e) {
             $this->toast('error', $e->getMessage());
+
             return;
         }
-
 
         $this->toast('error', 'Invalid email address or password.');
         $this->reset('password');
