@@ -5,17 +5,19 @@
             subtitle="Reserve Officers' Training Corps Registry"
         >
             <x-slot:actions>
-                <x-utils.button 
-                    type="button" 
-                    color="outline-gold" 
-                    size="md"
-                    @click="$dispatch('open-modal', 'csv-history-modal')"
-                >
-                    <svg class="w-4 h-4 text-[#f9c22e]" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" d="M12 6v6h4.5m4.5 0a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z" />
-                    </svg>
-                    <span class="hidden sm:inline">CSV History</span>
-                </x-utils.button>
+                @can('create', App\Models\Student::class)
+                    <x-utils.button 
+                        type="button" 
+                        color="outline-gold" 
+                        size="md"
+                        @click="$dispatch('open-modal', 'csv-history-modal')"
+                    >
+                        <svg class="w-4 h-4 text-[#f9c22e]" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M12 6v6h4.5m4.5 0a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z" />
+                        </svg>
+                        <span class="hidden sm:inline">CSV History</span>
+                    </x-utils.button>
+                @endcan
 
                 @can('create', App\Models\Student::class)
                     <x-utils.button 
@@ -35,7 +37,6 @@
     </x-slot:header>
 
     <div x-data="{
-        students: @js($this->students->items()),
         selectedStudent: null,
         activeTab: 'manual',
         get initials() {
@@ -104,7 +105,7 @@
                 </x-table.thead>
 
                 <x-table.tbody>
-                    @forelse($this->students as $index => $student)
+                    @forelse($this->students as $student)
                         <x-table.tr wire:key="rotc-student-{{ $student->id }}">
                             <x-table.td class="text-xs text-[#800033] font-mono font-bold tracking-wide">{{ $student->serial_number }}</x-table.td>
                             <x-table.td class="font-semibold text-[#2d0012] uppercase text-xs tracking-wide">{{ $student->last_name }}</x-table.td>

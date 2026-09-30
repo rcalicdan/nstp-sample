@@ -3,7 +3,7 @@
         <div class="bg-[#2d0012] header-pattern px-7 py-5 flex-shrink-0">
             <div class="flex items-start justify-between">
                 <div>
-                    <p class="text-[#f9c22e] text-xs font-display tracking-[0.2em] uppercase mb-1">EVSU NSTP – CWTS</p>
+                    <p class="text-[#f9c22e] text-xs font-display tracking-[0.2em] uppercase mb-1">EVSU NSTP – ROTC</p>
                     <h2 class="text-white font-display text-xl tracking-wide">Edit Data Record</h2>
                 </div>
                 <button @click="$dispatch('close-modal', 'edit-modal')" type="button"
@@ -19,8 +19,7 @@
                         :error="$errors->first('updateForm.serial_number')" />
                 </div>
 
-                <p
-                    class="text-[10px] font-display tracking-widest uppercase text-[#800033] border-b border-[#f9e6ec] pb-1">
+                <p class="text-[10px] font-display tracking-widest uppercase text-[#800033] border-b border-[#f9e6ec] pb-1">
                     Personal Information
                 </p>
 
@@ -56,8 +55,7 @@
                     </div>
                 </div>
 
-                <p
-                    class="text-[10px] font-display tracking-widest uppercase text-[#800033] border-b border-[#f9e6ec] pb-1 pt-2">
+                <p class="text-[10px] font-display tracking-widest uppercase text-[#800033] border-b border-[#f9e6ec] pb-1 pt-2">
                     Address & Contact
                 </p>
                 <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
@@ -91,8 +89,7 @@
             <div class="border-t border-[#f9e6ec] px-7 py-4 flex justify-between items-center bg-[#fdf2f5]">
                 <x-utils.button type="button" color="outline" size="sm"
                     @click="$dispatch('close-modal', 'edit-modal')">Cancel</x-utils.button>
-                <x-utils.button type="submit" color="primary" size="sm" loadingText="Updating...">Update
-                    Record</x-utils.button>
+                <x-utils.button type="submit" color="primary" size="sm" loadingText="Updating...">Update Record</x-utils.button>
             </div>
         </form>
     </div>

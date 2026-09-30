@@ -29,12 +29,16 @@
                             <x-table.td class="text-xs text-amber-600 font-bold">{{ $upload->updated_count }}</x-table.td>
                             <x-table.td class="text-xs text-gray-400">{{ $upload->created_at->format('M d, Y h:i A') }}</x-table.td>
                             <x-table.td align="center">
-                                <x-utils.delete-button 
-                                    confirmTitle="Rollback CSV Import?"
-                                    :message="'Are you sure you want to rollback ' . $upload->file_name . '? This will PERMANENTLY delete all ' . $upload->imported_count . ' imported student records!'"
-                                    confirmText="Rollback Import"
-                                    wire:click="rollbackCsv({{ $upload->id }})"
-                                />
+                                @can('delete', App\Models\Student::class)
+                                    <x-utils.delete-button 
+                                        confirmTitle="Rollback CSV Import?"
+                                        :message="'Are you sure you want to rollback ' . $upload->file_name . '? This will PERMANENTLY delete all ' . $upload->imported_count . ' imported student records!'"
+                                        confirmText="Rollback Import"
+                                        wire:click="rollbackCsv({{ $upload->id }})"
+                                    />
+                                @else
+                                    <span class="text-xs text-gray-400 italic">No permission</span>
+                                @endcan
                             </x-table.td>
                         </x-table.tr>
                     @empty

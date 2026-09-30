@@ -3,7 +3,7 @@
         <div class="bg-[#2d0012] header-pattern px-7 pt-5 pb-0 flex-shrink-0">
             <div class="flex items-start justify-between mb-4">
                 <div>
-                    <p class="text-[#f9c22e] text-xs font-display tracking-[0.2em] uppercase mb-1">EVSU NSTP – CWTS</p>
+                    <p class="text-[#f9c22e] text-xs font-display tracking-[0.2em] uppercase mb-1">EVSU NSTP – ROTC</p>
                     <h2 class="text-white font-display text-xl tracking-wide">Add New Data</h2>
                 </div>
                 <button @click="$dispatch('close-modal', 'create-modal')" type="button"
@@ -32,12 +32,11 @@
             <div x-show="activeTab === 'manual'" class="p-7 space-y-4 max-h-[70vh] overflow-y-auto">
                 <div class="bg-gradient-to-br from-[#fdf2f5] to-white border border-[#e8b4c4] rounded-lg p-4">
                     <x-form.label required>Serial No.</x-form.label>
-                    <x-form.input wire:model="createForm.serial_number" placeholder="C-08-000000-00"
+                    <x-form.input wire:model="createForm.serial_number" placeholder="R-08-000000-00"
                         class="font-mono tracking-wider uppercase" :error="$errors->first('createForm.serial_number')" />
                 </div>
 
-                <p
-                    class="text-[10px] font-display tracking-widest uppercase text-[#800033] border-b border-[#f9e6ec] pb-1">
+                <p class="text-[10px] font-display tracking-widest uppercase text-[#800033] border-b border-[#f9e6ec] pb-1">
                     Personal Information
                 </p>
 
@@ -73,8 +72,7 @@
                     </div>
                 </div>
 
-                <p
-                    class="text-[10px] font-display tracking-widest uppercase text-[#800033] border-b border-[#f9e6ec] pb-1 pt-2">
+                <p class="text-[10px] font-display tracking-widest uppercase text-[#800033] border-b border-[#f9e6ec] pb-1 pt-2">
                     Address & Contact
                 </p>
                 <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
@@ -114,8 +112,7 @@
                         <label class="block text-xs font-display tracking-wider uppercase text-amber-900 font-bold">
                             Duplicate Serial Strategy
                         </label>
-                        <p class="text-[11px] text-amber-700">What should happen if a student's Serial No. already
-                            exists?</p>
+                        <p class="text-[11px] text-amber-700">What should happen if a student's Serial No. already exists?</p>
                     </div>
                     <div class="flex gap-4 text-xs font-display uppercase tracking-wider">
                         <label class="flex items-center gap-1.5 cursor-pointer">
@@ -140,8 +137,7 @@
 
                     <input type="file" wire:model="csvFile" x-ref="fileInput" accept=".csv" class="hidden">
 
-                    <div
-                        class="w-12 h-12 bg-[#2d0012]/10 rounded-full flex items-center justify-center mx-auto mb-3 text-[#2d0012]">
+                    <div class="w-12 h-12 bg-[#2d0012]/10 rounded-full flex items-center justify-center mx-auto mb-3 text-[#2d0012]">
                         <svg class="w-6 h-6" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round"
                                 d="M3 16.5v2.25A2.25 2.25 0 0 0 5.25 21h13.5A2.25 2.25 0 0 0 21 18.75V16.5m-13.5-9L12 3m0 0l4.5 4.5M12 3v13.5" />
@@ -150,14 +146,12 @@
 
                     <p class="text-[#2d0012] font-display text-sm uppercase tracking-wide">
                         <span wire:loading.remove wire:target="csvFile">Click to upload or drag & drop CSV</span>
-                        <span wire:loading wire:target="csvFile" class="text-[#800033] font-bold">Uploading
-                            file...</span>
+                        <span wire:loading wire:target="csvFile" class="text-[#800033] font-bold">Uploading file...</span>
                     </p>
                     <p class="text-xs text-gray-400 mt-1">Accepts standard .CSV files up to 10MB</p>
 
                     @if ($csvFile)
-                        <div
-                            class="mt-3 inline-flex items-center gap-2 bg-[#800033] text-white text-xs px-3 py-1.5 rounded-full font-mono">
+                        <div class="mt-3 inline-flex items-center gap-2 bg-[#800033] text-white text-xs px-3 py-1.5 rounded-full font-mono">
                             <span>📄 {{ $csvFile->getClientOriginalName() }}</span>
                         </div>
                     @endif
@@ -167,7 +161,6 @@
                     <span class="text-xs text-red-500 font-semibold block">{{ $message }}</span>
                 @enderror
             </div>
-
 
             <div class="border-t border-[#f9e6ec] px-7 py-4 flex justify-between items-center bg-[#fdf2f5]">
                 <x-utils.button type="button" color="outline" size="sm"

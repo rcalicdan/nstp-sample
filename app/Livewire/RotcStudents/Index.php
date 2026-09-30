@@ -18,6 +18,7 @@ use Illuminate\Contracts\Pagination\LengthAwarePaginator;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Support\Facades\Cache;
+use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\Str;
 use Livewire\Attributes\Computed;
 use Livewire\Attributes\Layout;
@@ -56,6 +57,11 @@ class Index extends Component
     #[Url(except: '')]
     public string $schoolYear = '';
 
+    public function mount(): void
+    {
+        Gate::authorize('viewAny', Student::class);
+    }
+
     public function updated($property): void
     {
         if (\in_array($property, ['search', 'gender', 'schoolYear'], true)) {
@@ -65,6 +71,8 @@ class Index extends Component
 
     public function importCsv(StudentCsvImportService $service): void
     {
+        Gate::authorize('create', Student::class);
+
         $this->validate([
             'csvFile' => 'required|file|mimes:csv,txt|max:10240',
             'duplicateAction' => 'required|in:skip,update',
@@ -92,6 +100,8 @@ class Index extends Component
 
     public function rollbackCsv(CsvUpload $csvUpload, StudentCsvImportService $service): void
     {
+        Gate::authorize('delete', Student::class);
+
         $service->rollback($csvUpload);
         $this->clearStatsCache();
 
@@ -100,6 +110,8 @@ class Index extends Component
 
     public function store(): void
     {
+        Gate::authorize('create', Student::class);
+
         $this->createForm->store();
         $this->clearStatsCache();
         $this->toast('success', 'New ROTC student added successfully.');
@@ -108,6 +120,8 @@ class Index extends Component
 
     public function editStudent(Student $student): void
     {
+        Gate::authorize('update', $student);
+
         $this->updateForm->setStudent($student);
         $this->resetValidation();
         $this->dispatch('open-modal', 'edit-modal');
@@ -115,6 +129,8 @@ class Index extends Component
 
     public function update(): void
     {
+        Gate::authorize('update', $this->updateForm->student);
+
         $this->updateForm->update();
         $this->clearStatsCache();
         $this->toast('success', 'ROTC student record updated successfully.');
@@ -123,6 +139,8 @@ class Index extends Component
 
     public function deleteStudent(Student $student): void
     {
+        Gate::authorize('delete', $student);
+
         $student->delete();
         $this->clearStatsCache();
         $this->toast('success', 'ROTC student record removed.');

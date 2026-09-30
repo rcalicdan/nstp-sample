@@ -3,17 +3,19 @@
         <x-partials.header title="EVSU NSTP – CWTS"
             subtitle="National Service Training Program · Civic Welfare Training Service">
             <x-slot:actions>
-                <x-utils.button 
-                    type="button" 
-                    color="outline-gold" 
-                    size="md"
-                    @click="$dispatch('open-modal', 'csv-history-modal')"
-                >
-                    <svg class="w-4 h-4 text-[#f9c22e]" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" d="M12 6v6h4.5m4.5 0a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z" />
-                    </svg>
-                    <span class="hidden sm:inline">CSV History</span>
-                </x-utils.button>
+                @can('create', App\Models\Student::class)
+                    <x-utils.button 
+                        type="button" 
+                        color="outline-gold" 
+                        size="md"
+                        @click="$dispatch('open-modal', 'csv-history-modal')"
+                    >
+                        <svg class="w-4 h-4 text-[#f9c22e]" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M12 6v6h4.5m4.5 0a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z" />
+                        </svg>
+                        <span class="hidden sm:inline">CSV History</span>
+                    </x-utils.button>
+                @endcan
 
                 @can('create', App\Models\Student::class)
                     <x-utils.button 

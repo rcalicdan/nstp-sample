@@ -7,7 +7,7 @@
                     <div x-text="initials" class="w-16 h-16 rounded flex-shrink-0 bg-[#f9c22e] text-[#2d0012] text-2xl font-display font-bold flex items-center justify-center shadow-lg border-2 border-[#e5a800]"></div>
                     <div class="pt-1">
                         <span class="inline-flex items-center text-[0.68rem] font-bold tracking-wider px-2 py-0.5 rounded bg-[#f9c22e]/20 text-[#fde68a] border border-[#f9c22e]/30 uppercase mb-2 block w-fit">
-                            CWTS Student
+                            ROTC Cadet
                         </span>
                         <h2 x-text="`${selectedStudent?.first_name || ''} ${selectedStudent?.middle_name ? selectedStudent.middle_name + ' ' : ''}${selectedStudent?.last_name || ''}`" class="text-white font-display text-xl tracking-wide leading-snug"></h2>
                         <p x-text="selectedStudent?.course || '—'" class="text-[#e8b4c4]/60 text-xs font-body mt-0.5 uppercase tracking-widest"></p>
